@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRADR.</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMEEwQTBBIi8+CiAgPHRleHQgeD0iNSIgeT0iMjQiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtd2VpZ2h0PSI3MDAiIGZvbnQtc2l6ZT0iMjIiIGZpbGw9IiNGMEVERTgiPlQ8L3RleHQ+CiAgPGNpcmNsZSBjeD0iMjYiIGN5PSIyMiIgcj0iMyIgZmlsbD0iI0M5QTg0QyIvPgo8L3N2Zz4=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black:      #0A0A0A;
+    --surface:    #111111;
+    --surface2:   #161616;
+    --border:     rgba(255,255,255,0.07);
+    --border2:    rgba(255,255,255,0.13);
+    --text:       #F0EDE8;
+    --muted:      rgba(240,237,232,0.42);
+    --dim:        rgba(240,237,232,0.2);
+    --gold:       #C9A84C;
+    --gold-soft:  rgba(201,168,76,0.12);
+    --green:      #4CAF6F;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* ── NAV ────────────────────────────────────── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    border-bottom: 0.5px solid var(--border);
+    background: rgba(10,10,10,0.94);
+    backdrop-filter: blur(14px);
+  }
+
+  .logo {
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: 0.14em;
+  }
+  .logo .dot { color: var(--gold); }
+
+  .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 32px;
+  }
+  .nav-links a {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color 0.18s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  /* ── HERO ───────────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    padding: 160px 48px 96px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* subtle grid */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 72px 72px;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  /* gold glow at bottom */
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -120px; left: 50%;
+    transform: translateX(-50%);
+    width: 640px; height: 320px;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 20px; height: 1px;
+    background: var(--gold);
+    display: block;
+  }
+
+  .hero-name {
+    font-size: clamp(64px, 10vw, 120px);
+    font-weight: 300;
+    letter-spacing: -0.04em;
+    line-height: 0.92;
+    color: var(--text);
+    position: relative;
+    z-index: 1;
+  }
+  .hero-name .dot { color: var(--gold); }
+
+  .hero-desc {
+    margin-top: 36px;
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.75;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-desc strong {
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 36px; right: 48px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dim);
+    writing-mode: vertical-rl;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-scroll::after {
+    content: '';
+    width: 1px; height: 44px;
+    background: linear-gradient(to bottom, rgba(201,168,76,0.5), transparent);
+  }
+
+  /* ── SECTION SHELL ──────────────────────────── */
+  .section { padding: 96px 48px; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 52px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::before {
+    content: '';
+    width: 14px; height: 1px;
+    background: var(--gold);
+    display: block;
+  }
+
+  hr.div { border: none; border-top: 0.5px solid var(--border); margin: 0 48px; }
+
+  /* ── TRADING SECTION ────────────────────────── */
+  .trading-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .trading-headline {
+    font-size: clamp(30px, 4vw, 44px);
+    font-weight: 300;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+    color: var(--text);
+  }
+  .trading-headline em { font-style: normal; color: var(--gold); }
+
+  .trading-body {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.85;
+    font-weight: 300;
+    margin-bottom: 20px;
+  }
+
+  /* instruments */
+  .instruments {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .instrument {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0;
+    border-bottom: 0.5px solid var(--border);
+    gap: 16px;
+  }
+
+  .instrument-left { display: flex; align-items: center; gap: 16px; }
+
+  .instrument-ticker {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.05em;
+    min-width: 52px;
+  }
+
+  .instrument-name {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .instrument-tags { display: flex; gap: 6px; }
+
+  .chip {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 0.5px solid var(--border2);
+    padding: 3px 8px;
+    border-radius: 0;
+  }
+  .chip.gold { color: var(--gold); border-color: rgba(201,168,76,0.3); }
+
+  /* strategy callout */
+  .strategy-box {
+    margin-top: 36px;
+    border: 0.5px solid var(--border2);
+    padding: 28px;
+    background: var(--surface);
+    position: relative;
+  }
+  .strategy-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--gold);
+  }
+  .strategy-box-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .strategy-box p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  /* ── PORTFOLIO SECTION ──────────────────────── */
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .portfolio-card {
+    background: var(--black);
+    padding: 36px 32px 40px;
+    position: relative;
+    transition: background 0.22s;
+    overflow: hidden;
+  }
+  .portfolio-card:hover { background: var(--surface); }
+
+  /* top border reveal on hover */
+  .portfolio-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.28s ease;
+  }
+  .portfolio-card:hover::after { transform: scaleX(1); }
+
+  .pc-type {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .pc-ticker {
+    font-family: 'Space Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.03em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .pc-ticker .dollar { font-size: 16px; color: rgba(201,168,76,0.55); }
+
+  .pc-name {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.25;
+  }
+
+  .pc-desc {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  .pc-badge {
+    display: inline-block;
+    margin-top: 22px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 0.5px solid rgba(201,168,76,0.3);
+    padding: 4px 10px;
+  }
+
+  /* ── CONTACT ────────────────────────────────── */
+  .contact-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 96px;
+    align-items: start;
+  }
+
+  .contact-headline {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    color: var(--text);
+  }
+  .contact-headline em { font-style: normal; color: var(--gold); }
+
+  .contact-note {
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.75;
+    max-width: 340px;
+  }
+
+  .contact-rows { display: flex; flex-direction: column; }
+
+  .contact-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 19px 0;
+    border-bottom: 0.5px solid var(--border);
+    cursor: pointer;
+  }
+  .contact-row:first-child { border-top: 0.5px solid var(--border); }
+  .contact-row:hover .contact-arrow { color: var(--gold); transform: translate(3px,-3px); }
+
+  .contact-row-lbl {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .contact-row-val {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text);
+  }
+
+  .contact-arrow {
+    font-size: 17px;
+    color: var(--dim);
+    transition: color 0.18s, transform 0.18s;
+  }
+
+  /* ── FOOTER ─────────────────────────────────── */
+  footer {
+    border-top: 0.5px solid var(--border);
+    padding: 28px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo { font-weight: 600; font-size: 14px; letter-spacing: 0.14em; }
+  .footer-logo .dot { color: var(--gold); }
+
+  .footer-copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--dim);
+  }
+
+  .footer-nav { display: flex; gap: 24px; list-style: none; }
+  .footer-nav a {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color 0.18s;
+  }
+  .footer-nav a:hover { color: var(--text); }
+
+  /* ── RESPONSIVE ─────────────────────────────── */
+  @media (max-width: 900px) {
+    nav { padding: 0 24px; }
+    .hero { padding: 120px 24px 72px; }
+    hr.div { margin: 0 24px; }
+    .section { padding: 72px 24px; }
+    .trading-layout { grid-template-columns: 1fr; gap: 40px; }
+    .portfolio-grid { grid-template-columns: 1fr; }
+    .contact-layout { grid-template-columns: 1fr; gap: 48px; }
+    .work-item { grid-template-columns: 1fr; gap: 8px; }
+    footer { padding: 24px; flex-direction: column; gap: 16px; text-align: center; }
+    .hero-scroll { display: none; }
+  }
+  @media (max-width: 580px) {
+    .nav-links { display: none; }
+    .instrument { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="logo">TRADR<span class="dot">.</span></span>
+  <ul class="nav-links">
+    <li><a href="#trading">Trading</a></li>
+    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#now">Now</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-tag">Futures Trader · Crypto Investor</p>
+  <h1 class="hero-name">TRADR<span class="dot">.</span></h1>
+  <p class="hero-desc">
+    Day trading <strong>NQ &amp; ES futures</strong> using orderflow.
+    Building a long-term crypto portfolio around <strong>Bitcoin</strong>,
+    <strong>Hyperliquid</strong>, and <strong>Capital B</strong>.
+  </p>
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+<hr class="div">
+
+<!-- TRADING -->
+<section class="section" id="trading">
+  <div class="section-label">Futures Trading</div>
+  <div class="trading-layout">
+
+    <div>
+      <h2 class="trading-headline">
+        Reading the<br>tape on <em>NQ &amp; ES.</em>
+      </h2>
+    </div>
+
+    <div>
+      <p class="trading-body">
+        Day trading NASDAQ and S&amp;P 500 E-mini futures on the CME.
+        The edge is in orderflow — reading what's actually happening at price
+        rather than fitting indicators to a narrative.
+      </p>
+      <p class="trading-body">
+        Entries are framed around session structure and timed to key windows
+        where institutional activity tends to show up.
+      </p>
+
+      <div class="instruments">
+        <div class="instrument">
+          <div class="instrument-left">
+            <span class="instrument-ticker">NQ</span>
+            <span class="instrument-name">NASDAQ-100 E-mini Futures</span>
+          </div>
+          <div class="instrument-tags">
+            <span class="chip gold">Primary</span>
+            <span class="chip">CME</span>
+          </div>
+        </div>
+        <div class="instrument">
+          <div class="instrument-left">
+            <span class="instrument-ticker">ES</span>
+            <span class="instrument-name">S&amp;P 500 E-mini Futures</span>
+          </div>
+          <div class="instrument-tags">
+            <span class="chip">CME</span>
+            <span class="chip">Day Trade</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="strategy-box">
+        <div class="strategy-box-label">Strategy</div>
+        <p>
+          Orderflow-based execution — delta analysis, absorption, and
+          imbalance identification at key structural levels.
+          Sessions focused on London open and the NY morning window.
+          All entries logged and reviewed daily.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- CRYPTO PORTFOLIO -->
+<section class="section" id="portfolio">
+  <div class="section-label">Crypto Portfolio</div>
+  <div class="portfolio-grid">
+
+    <div class="portfolio-card">
+      <div class="pc-type">Core Position</div>
+      <div class="pc-ticker"><span class="dollar">$</span>BTC</div>
+      <div class="pc-name">Bitcoin</div>
+      <div class="pc-desc">
+        The base layer. Long-term conviction hold. Everything else is sized relative to BTC.
+      </div>
+      <span class="pc-badge">Store of Value</span>
+    </div>
+
+    <div class="portfolio-card">
+      <div class="pc-type">High Conviction</div>
+      <div class="pc-ticker"><span class="dollar">$</span>HYPE</div>
+      <div class="pc-name">Hyperliquid</div>
+      <div class="pc-desc">
+        Onchain perpetuals decentralized exchange with genuine product-market fit.
+        Trading volume, real revenue, and a community-first token distribution.
+      </div>
+      <span class="pc-badge">Perpetual DEX</span>
+    </div>
+
+    <div class="portfolio-card">
+      <div class="pc-type">Bitcoin-backed Treasury Company</div>
+      <div class="pc-ticker"><span class="dollar">$</span>ALCPB</div>
+      <div class="pc-name">Capital B</div>
+      <div class="pc-desc">
+        Europe's first Bitcoin treasury company, listed in France.
+        A regulated vehicle for BTC exposure within traditional markets.
+      </div>
+      <span class="pc-badge">BTC Treasury</span>
+    </div>
+
+  </div>
+</section>
+
+<hr class="div">
+
+<!-- CONTACT -->
+<section class="section" id="contact">
+  <div class="contact-layout">
+    <div>
+      <div class="section-label">Contact</div>
+      <h2 class="contact-headline">
+        Let's talk<br><em>markets.</em>
+      </h2>
+      <p class="contact-note">
+        Open to conversations with other traders, crypto investors,
+        and anyone building interesting things at the intersection of both.
+      </p>
+    </div>
+
+    <div class="contact-rows">
+      <a href="https://x.com/enroutetohnwi_" target="_blank" class="contact-row">
+        <div>
+          <div class="contact-row-lbl">Twitter / X</div>
+          <div class="contact-row-val">@enroutetohnwi_</div>
+        </div>
+        <span class="contact-arrow">↗</span>
+      </a>
+      <a href="mailto:hello@tradr.io" class="contact-row">
+        <div>
+          <div class="contact-row-lbl">Email</div>
+          <div class="contact-row-val">riorazer122345@gmail.com</div>
+        </div>
+        <span class="contact-arrow">↗</span>
+      </a>
+      <a href="https://discord.gg/ZN69zFpH" target="_blank" class="contact-row">
+        <div>
+          <div class="contact-row-lbl">Discord</div>
+          <div class="contact-row-val">tradr.</div>
+        </div>
+        <span class="contact-arrow">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">TRADR<span class="dot">.</span></span>
+  <span class="footer-copy">© 2026</span>
+  <ul class="footer-nav">
+    <li><a href="#trading">Trading</a></li>
+    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</footer>
+
+</body>
+</html>
