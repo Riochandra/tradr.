@@ -1,32 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>TRADR.</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMEEwQTBBIi8+CiAgPHRleHQgeD0iNSIgeT0iMjQiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtd2VpZ2h0PSI3MDAiIGZvbnQtc2l6ZT0iMjIiIGZpbGw9IiNGMEVERTgiPlQ8L3RleHQ+CiAgPGNpcmNsZSBjeD0iMjYiIGN5PSIyMiIgcj0iMyIgZmlsbD0iI0M5QTg0QyIvPgo8L3N2Zz4=">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMEEwQTBBIi8+CiAgPHRleHQgeD0iNSIgeT0iMjQiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtd2VpZ2h0PSI3MDAiIGZvbnQtc2l6ZT0iMjIiIGZpbGw9IiNGMEVERTgiPlQ8L3RleHQ+CiAgPGNpcmNsZSBjeD0iMjYiIGN5PSIyMiIgcj0iMyIgZmlsbD0iI0M5QTg0QyIvPgo8L3N2Zz4=" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <style>
+  /* ── reset & vars ─────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --black:      #0A0A0A;
-    --surface:    #111111;
-    --surface2:   #161616;
-    --border:     rgba(255,255,255,0.07);
-    --border2:    rgba(255,255,255,0.13);
-    --text:       #F0EDE8;
-    --muted:      rgba(240,237,232,0.42);
-    --dim:        rgba(240,237,232,0.2);
-    --gold:       #C9A84C;
-    --gold-soft:  rgba(201,168,76,0.12);
-    --green:      #4CAF6F;
+    --black: #0A0A0A;
+    --surface: #111111;
+    --surface2: #161616;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #F0EDE8;
+    --muted: rgba(240,237,232,0.42);
+    --dim: rgba(240,237,232,0.2);
+    --gold: #C9A84C;
+    --gold-soft: rgba(201,168,76,0.12);
+    --green: #4CAF6F;
+    --edit-bg: rgba(201,168,76,0.06);
   }
-
   html { scroll-behavior: smooth; }
-
   body {
     background: var(--black);
     color: var(--text);
@@ -36,10 +35,9 @@
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
-
   a { color: inherit; text-decoration: none; }
 
-  /* ── NAV ────────────────────────────────────── */
+  /* ── nav ────────────────────────────────────────── */
   nav {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -53,19 +51,9 @@
     background: rgba(10,10,10,0.94);
     backdrop-filter: blur(14px);
   }
-
-  .logo {
-    font-weight: 600;
-    font-size: 17px;
-    letter-spacing: 0.14em;
-  }
+  .logo { font-weight: 600; font-size: 17px; letter-spacing: 0.14em; }
   .logo .dot { color: var(--gold); }
-
-  .nav-links {
-    list-style: none;
-    display: flex;
-    gap: 32px;
-  }
+  .nav-links { list-style: none; display: flex; gap: 32px; }
   .nav-links a {
     font-size: 12px;
     font-weight: 400;
@@ -76,7 +64,7 @@
   }
   .nav-links a:hover { color: var(--text); }
 
-  /* ── HERO ───────────────────────────────────── */
+  /* ── hero ───────────────────────────────────────── */
   .hero {
     min-height: 100vh;
     padding: 160px 48px 96px;
@@ -86,8 +74,6 @@
     position: relative;
     overflow: hidden;
   }
-
-  /* subtle grid */
   .hero::before {
     content: '';
     position: absolute;
@@ -99,8 +85,6 @@
     opacity: 0.35;
     pointer-events: none;
   }
-
-  /* gold glow at bottom */
   .hero::after {
     content: '';
     position: absolute;
@@ -110,7 +94,6 @@
     background: radial-gradient(ellipse, rgba(201,168,76,0.07) 0%, transparent 70%);
     pointer-events: none;
   }
-
   .hero-tag {
     font-family: 'Space Mono', monospace;
     font-size: 10px;
@@ -128,7 +111,6 @@
     background: var(--gold);
     display: block;
   }
-
   .hero-name {
     font-size: clamp(64px, 10vw, 120px);
     font-weight: 300;
@@ -139,7 +121,6 @@
     z-index: 1;
   }
   .hero-name .dot { color: var(--gold); }
-
   .hero-desc {
     margin-top: 36px;
     font-size: 16px;
@@ -150,12 +131,7 @@
     position: relative;
     z-index: 1;
   }
-
-  .hero-desc strong {
-    color: var(--text);
-    font-weight: 400;
-  }
-
+  .hero-desc strong { color: var(--text); font-weight: 400; }
   .hero-scroll {
     position: absolute;
     bottom: 36px; right: 48px;
@@ -175,9 +151,8 @@
     background: linear-gradient(to bottom, rgba(201,168,76,0.5), transparent);
   }
 
-  /* ── SECTION SHELL ──────────────────────────── */
+  /* ── section shell ────────────────────────────── */
   .section { padding: 96px 48px; }
-
   .section-label {
     font-family: 'Space Mono', monospace;
     font-size: 10px;
@@ -195,17 +170,15 @@
     background: var(--gold);
     display: block;
   }
-
   hr.div { border: none; border-top: 0.5px solid var(--border); margin: 0 48px; }
 
-  /* ── TRADING SECTION ────────────────────────── */
+  /* ── trading ────────────────────────────────────── */
   .trading-layout {
     display: grid;
     grid-template-columns: 1fr 1.1fr;
     gap: 80px;
     align-items: start;
   }
-
   .trading-headline {
     font-size: clamp(30px, 4vw, 44px);
     font-weight: 300;
@@ -214,7 +187,6 @@
     color: var(--text);
   }
   .trading-headline em { font-style: normal; color: var(--gold); }
-
   .trading-body {
     font-size: 14px;
     color: var(--muted);
@@ -222,15 +194,12 @@
     font-weight: 300;
     margin-bottom: 20px;
   }
-
-  /* instruments */
   .instruments {
     margin-top: 40px;
     display: flex;
     flex-direction: column;
     border-top: 0.5px solid var(--border);
   }
-
   .instrument {
     display: flex;
     align-items: center;
@@ -239,9 +208,7 @@
     border-bottom: 0.5px solid var(--border);
     gap: 16px;
   }
-
   .instrument-left { display: flex; align-items: center; gap: 16px; }
-
   .instrument-ticker {
     font-family: 'Space Mono', monospace;
     font-size: 13px;
@@ -250,15 +217,12 @@
     letter-spacing: 0.05em;
     min-width: 52px;
   }
-
   .instrument-name {
     font-size: 13px;
     color: var(--muted);
     font-weight: 300;
   }
-
   .instrument-tags { display: flex; gap: 6px; }
-
   .chip {
     font-family: 'Space Mono', monospace;
     font-size: 9px;
@@ -270,8 +234,6 @@
     border-radius: 0;
   }
   .chip.gold { color: var(--gold); border-color: rgba(201,168,76,0.3); }
-
-  /* strategy callout */
   .strategy-box {
     margin-top: 36px;
     border: 0.5px solid var(--border2);
@@ -301,14 +263,13 @@
     font-weight: 300;
   }
 
-  /* ── PORTFOLIO SECTION ──────────────────────── */
+  /* ── portfolio ──────────────────────────────────── */
   .portfolio-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1px;
     background: var(--border);
   }
-
   .portfolio-card {
     background: var(--black);
     padding: 36px 32px 40px;
@@ -317,8 +278,6 @@
     overflow: hidden;
   }
   .portfolio-card:hover { background: var(--surface); }
-
-  /* top border reveal on hover */
   .portfolio-card::after {
     content: '';
     position: absolute;
@@ -330,7 +289,6 @@
     transition: transform 0.28s ease;
   }
   .portfolio-card:hover::after { transform: scaleX(1); }
-
   .pc-type {
     font-family: 'Space Mono', monospace;
     font-size: 9px;
@@ -339,7 +297,6 @@
     color: var(--muted);
     margin-bottom: 20px;
   }
-
   .pc-ticker {
     font-family: 'Space Mono', monospace;
     font-size: 26px;
@@ -360,7 +317,6 @@
   }
   .pc-ticker .dollar { font-size: 16px; color: rgba(201,168,76,0.55); }
   .pc-ticker-cash .dollar { font-size: 16px; color: rgba(201,168,76,0.55); }
-
   .pc-name {
     font-size: 16px;
     font-weight: 400;
@@ -368,14 +324,12 @@
     margin-bottom: 16px;
     line-height: 1.25;
   }
-
   .pc-desc {
     font-size: 12.5px;
     color: var(--muted);
     line-height: 1.75;
     font-weight: 300;
   }
-
   .pc-badge {
     display: inline-block;
     margin-top: 22px;
@@ -388,14 +342,116 @@
     padding: 4px 10px;
   }
 
-  /* ── CONTACT ────────────────────────────────── */
+  /* ── ALLOCATION ──────────────────────────────────── */
+  .allocation-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 64px;
+    align-items: start;
+  }
+  .allocation-headline {
+    font-size: clamp(28px, 3.8vw, 42px);
+    font-weight: 300;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+    color: var(--text);
+  }
+  .allocation-headline em { font-style: normal; color: var(--gold); }
+  .allocation-sub {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    margin-top: 18px;
+    line-height: 1.75;
+    max-width: 340px;
+  }
+  .allocation-list {
+    display: flex;
+    flex-direction: column;
+    border-top: 0.5px solid var(--border);
+  }
+  .alloc-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 0.5px solid var(--border);
+    gap: 14px;
+    transition: background 0.15s;
+  }
+  .alloc-item.edit-mode {
+    background: var(--edit-bg);
+    margin: 0 -8px;
+    padding: 14px 8px;
+    border-radius: 4px;
+  }
+  .alloc-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    min-width: 52px;
+    color: var(--text);
+    letter-spacing: 0.04em;
+  }
+  .alloc-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .alloc-bar {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 0;
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    width: 0%;
+  }
+  .alloc-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--muted);
+    min-width: 52px;
+    text-align: right;
+    letter-spacing: 0.02em;
+  }
+  .alloc-pct-input {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    background: transparent;
+    border: 0.5px solid var(--border2);
+    color: var(--gold);
+    padding: 2px 6px;
+    width: 60px;
+    text-align: right;
+    border-radius: 0;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .alloc-pct-input:focus { border-color: var(--gold); }
+  .alloc-total {
+    margin-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--dim);
+    padding-top: 16px;
+    border-top: 0.5px solid var(--border);
+  }
+  .alloc-total .num { color: var(--text); }
+  .alloc-total .num.gold { color: var(--gold); }
+
+  /* ── contact ────────────────────────────────────── */
   .contact-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 96px;
     align-items: start;
   }
-
   .contact-headline {
     font-size: clamp(32px, 5vw, 52px);
     font-weight: 300;
@@ -404,7 +460,6 @@
     color: var(--text);
   }
   .contact-headline em { font-style: normal; color: var(--gold); }
-
   .contact-note {
     margin-top: 18px;
     font-size: 13px;
@@ -413,9 +468,7 @@
     line-height: 1.75;
     max-width: 340px;
   }
-
   .contact-rows { display: flex; flex-direction: column; }
-
   .contact-row {
     display: flex;
     align-items: center;
@@ -426,7 +479,6 @@
   }
   .contact-row:first-child { border-top: 0.5px solid var(--border); }
   .contact-row:hover .contact-arrow { color: var(--gold); transform: translate(3px,-3px); }
-
   .contact-row-lbl {
     font-family: 'Space Mono', monospace;
     font-size: 9px;
@@ -440,14 +492,13 @@
     font-weight: 400;
     color: var(--text);
   }
-
   .contact-arrow {
     font-size: 17px;
     color: var(--dim);
     transition: color 0.18s, transform 0.18s;
   }
 
-  /* ── FOOTER ─────────────────────────────────── */
+  /* ── footer ─────────────────────────────────────── */
   footer {
     border-top: 0.5px solid var(--border);
     padding: 28px 48px;
@@ -455,17 +506,14 @@
     align-items: center;
     justify-content: space-between;
   }
-
   .footer-logo { font-weight: 600; font-size: 14px; letter-spacing: 0.14em; }
   .footer-logo .dot { color: var(--gold); }
-
   .footer-copy {
     font-family: 'Space Mono', monospace;
     font-size: 9px;
     letter-spacing: 0.1em;
     color: var(--dim);
   }
-
   .footer-nav { display: flex; gap: 24px; list-style: none; }
   .footer-nav a {
     font-family: 'Space Mono', monospace;
@@ -477,7 +525,108 @@
   }
   .footer-nav a:hover { color: var(--text); }
 
-  /* ── RESPONSIVE ─────────────────────────────── */
+  /* ── LOCK / EDIT TOGGLE ───────────────────────── */
+  .edit-toggle {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 200;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 0.5px solid var(--border2);
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    user-select: none;
+  }
+  .edit-toggle:hover { border-color: var(--gold); color: var(--gold); }
+  .edit-toggle.active {
+    background: var(--gold-soft);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .edit-toggle .lock-icon { line-height: 1; transition: transform 0.3s ease; }
+  .edit-toggle.active .lock-icon { transform: rotate(8deg); }
+
+  /* ── save button ──────────────────────────────────── */
+  .save-btn {
+    position: fixed;
+    bottom: 82px;
+    right: 28px;
+    z-index: 200;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--gold);
+    color: var(--black);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 0;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 24px rgba(201,168,76,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+  }
+  .save-btn.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .save-btn:hover { background: #dbb95a; box-shadow: 0 6px 32px rgba(201,168,76,0.35); }
+  .save-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+  .save-feedback {
+    position: fixed;
+    bottom: 134px;
+    right: 28px;
+    z-index: 200;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    background: var(--surface);
+    padding: 6px 14px;
+    border: 0.5px solid var(--border2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .save-feedback.visible { opacity: 1; }
+  .save-feedback.error { color: #e06b6b; border-color: rgba(224,107,107,0.3); }
+
+  /* ── toast ────────────────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 180px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    background: var(--surface2);
+    border: 0.5px solid var(--border2);
+    color: var(--text);
+    padding: 12px 28px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+    border-radius: 0;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { border-color: rgba(224,107,107,0.3); color: #e06b6b; }
+  .toast.success { border-color: rgba(76,175,111,0.3); color: var(--green); }
+
+  /* ── responsive ─────────────────────────────────── */
   @media (max-width: 900px) {
     nav { padding: 0 24px; }
     .hero { padding: 120px 24px 72px; }
@@ -485,30 +634,38 @@
     .section { padding: 72px 24px; }
     .trading-layout { grid-template-columns: 1fr; gap: 40px; }
     .portfolio-grid { grid-template-columns: 1fr; }
+    .allocation-layout { grid-template-columns: 1fr; gap: 40px; }
     .contact-layout { grid-template-columns: 1fr; gap: 48px; }
-    .work-item { grid-template-columns: 1fr; gap: 8px; }
     footer { padding: 24px; flex-direction: column; gap: 16px; text-align: center; }
     .hero-scroll { display: none; }
+    .edit-toggle { bottom: 18px; right: 18px; width: 38px; height: 38px; font-size: 16px; }
+    .save-btn { bottom: 70px; right: 18px; padding: 8px 16px; font-size: 9px; }
+    .save-feedback { bottom: 118px; right: 18px; font-size: 9px; padding: 4px 12px; }
   }
   @media (max-width: 580px) {
     .nav-links { display: none; }
     .instrument { flex-wrap: wrap; }
+    .alloc-item { flex-wrap: wrap; gap: 8px; }
+    .alloc-label { min-width: 40px; font-size: 12px; }
+    .alloc-pct { min-width: 44px; font-size: 12px; }
+    .alloc-pct-input { width: 52px; font-size: 12px; }
   }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
+<!-- ─── NAV ────────────────────────────────────────── -->
 <nav>
   <span class="logo">TRADR<span class="dot">.</span></span>
   <ul class="nav-links">
     <li><a href="#trading">Trading</a></li>
     <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#allocation">Allocation</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
 </nav>
 
-<!-- HERO -->
+<!-- ─── HERO ────────────────────────────────────────── -->
 <section class="hero">
   <p class="hero-tag">Futures Trader · Crypto Investor</p>
   <h1 class="hero-name">TRADR<span class="dot">.</span></h1>
@@ -518,24 +675,22 @@
     <strong>Hyperliquid</strong>, and <strong>Capital B</strong>.
   </p>
   <p class="hero-desc">
-   Determined to securing maximum funding from futures propfirms, and re-invest payouts into long-term crypto portfolio.
+    Determined to securing maximum funding from futures propfirms, and re-invest payouts into long-term crypto portfolio.
   </p>
   <div class="hero-scroll">Scroll</div>
 </section>
 
-<hr class="div">
+<hr class="div" />
 
-<!-- TRADING -->
+<!-- ─── TRADING ────────────────────────────────────── -->
 <section class="section" id="trading">
   <div class="section-label">Futures Trading</div>
   <div class="trading-layout">
-
     <div>
       <h2 class="trading-headline">
-        Reading the<br>tape on <em>NQ &amp; ES.</em>
+        Reading the<br />tape on <em>NQ &amp; ES.</em>
       </h2>
     </div>
-
     <div>
       <p class="trading-body">
         Day trading NASDAQ and S&amp;P 500 E-mini futures on the CME.
@@ -546,7 +701,6 @@
         Entries are framed around session structure and timed to key windows
         where institutional activity tends to show up.
       </p>
-
       <div class="instruments">
         <div class="instrument">
           <div class="instrument-left">
@@ -569,7 +723,6 @@
           </div>
         </div>
       </div>
-
       <div class="strategy-box">
         <div class="strategy-box-label">Strategy</div>
         <p>
@@ -580,69 +733,50 @@
         </p>
       </div>
     </div>
-
   </div>
 </section>
 
-<hr class="div">
+<hr class="div" />
 
-<!-- CRYPTO PORTFOLIO -->
+<!-- ─── PORTFOLIO ──────────────────────────────────── -->
 <section class="section" id="portfolio">
-  <div class="section-label">Portfolio & Cash Positions</div>
+  <div class="section-label">Portfolio &amp; Cash Positions</div>
   <div class="portfolio-grid">
-
     <div class="portfolio-card">
       <div class="pc-type">Stablecoin</div>
       <div class="pc-ticker"><span class="dollar">$</span>USDT</div>
       <div class="pc-name">Tether USD</div>
-      <div class="pc-desc">
-        Largest USD-backed stablecoin issuer. Currently making up the majority of position.
-      </div>
+      <div class="pc-desc">Largest USD-backed stablecoin issuer. Currently making up the majority of position.</div>
       <span class="pc-badge">Stablecoin</span>
     </div>
-
     <div class="portfolio-card">
       <div class="pc-type">Core Position</div>
       <div class="pc-ticker"><span class="dollar">$</span>BTC</div>
       <div class="pc-name">Bitcoin</div>
-      <div class="pc-desc">
-        The base layer. Long-term conviction hold. Everything else is sized relative to BTC.
-      </div>
+      <div class="pc-desc">The base layer. Long-term conviction hold. Everything else is sized relative to BTC.</div>
       <span class="pc-badge">Store of Value</span>
     </div>
-
     <div class="portfolio-card">
       <div class="pc-type">High Conviction</div>
       <div class="pc-ticker"><span class="dollar">$</span>HYPE</div>
       <div class="pc-name">Hyperliquid</div>
-      <div class="pc-desc">
-        Onchain perpetuals decentralized exchange with genuine product-market fit.
-        Trading volume, real revenue, and a community-first token distribution.
-      </div>
+      <div class="pc-desc">Onchain perpetuals decentralized exchange with genuine product-market fit. Trading volume, real revenue, and a community-first token distribution.</div>
       <span class="pc-badge">Perpetual DEX</span>
     </div>
-
     <div class="portfolio-card">
       <div class="pc-type">Bitcoin-backed Treasury Company</div>
       <div class="pc-ticker"><span class="dollar">$</span>ALCPB</div>
       <div class="pc-name">Capital B</div>
-      <div class="pc-desc">
-        Europe's first Bitcoin treasury company, listed in France.
-        A regulated vehicle for BTC exposure within traditional markets.
-      </div>
+      <div class="pc-desc">Europe's first Bitcoin treasury company, listed in France. A regulated vehicle for BTC exposure within traditional markets.</div>
       <span class="pc-badge">BTC Treasury</span>
     </div>
-
     <div class="portfolio-card">
       <div class="pc-type">Stablecoin</div>
       <div class="pc-ticker"><span class="dollar">$</span>USDC</div>
       <div class="pc-name">Circle USD</div>
-      <div class="pc-desc">
-        Second largest USD-backed stablecoin issuer
-      </div>
+      <div class="pc-desc">Second largest USD-backed stablecoin issuer</div>
       <span class="pc-badge">Stablecoin</span>
     </div>
-
     <div class="portfolio-card">
       <div class="pc-type">Cash Reserves</div>
       <div class="pc-ticker-cash"><span class="dollar">IDR</span>Indonesian Rupiah</div>
@@ -651,26 +785,50 @@
       <div class="pc-ticker-cash"><span class="dollar">CAD</span>Canadian Dollar</div>
       <span class="pc-badge">Cash</span>
     </div>
-
   </div>
 </section>
 
-<hr class="div">
+<hr class="div" />
 
-<!-- CONTACT -->
+<!-- ─── ALLOCATION ──────────────────────────────────── -->
+<section class="section" id="allocation">
+  <div class="section-label">Coin Allocation</div>
+  <div class="allocation-layout">
+    <div>
+      <h2 class="allocation-headline">
+        Portfolio<br /><em>breakdown.</em>
+      </h2>
+      <p class="allocation-sub">
+        Live allocation across crypto and fiat. Sorted by percentage — edit with the lock icon.
+      </p>
+    </div>
+    <div>
+      <div class="allocation-list" id="allocList">
+        <!-- dynamically rendered -->
+      </div>
+      <div class="alloc-total">
+        <span>Total</span>
+        <span class="num gold" id="allocTotalPct">100.00%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div" />
+
+<!-- ─── CONTACT ────────────────────────────────────── -->
 <section class="section" id="contact">
   <div class="contact-layout">
     <div>
       <div class="section-label">Contact</div>
       <h2 class="contact-headline">
-        Let's talk<br><em>markets.</em>
+        Let's talk<br /><em>markets.</em>
       </h2>
       <p class="contact-note">
         Open to conversations with other traders, crypto investors,
         and anyone building interesting things at the intersection of both.
       </p>
     </div>
-
     <div class="contact-rows">
       <a href="https://x.com/enroutetohnwi_" target="_blank" class="contact-row">
         <div>
@@ -679,7 +837,7 @@
         </div>
         <span class="contact-arrow">↗</span>
       </a>
-      <a href="mailto:hello@tradr.io" class="contact-row">
+      <a href="mailto:riorazer122345@gmail.com" class="contact-row">
         <div>
           <div class="contact-row-lbl">Email</div>
           <div class="contact-row-val">riorazer122345@gmail.com</div>
@@ -697,16 +855,442 @@
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- ─── FOOTER ────────────────────────────────────── -->
 <footer>
   <span class="footer-logo">TRADR<span class="dot">.</span></span>
   <span class="footer-copy">© 2026</span>
   <ul class="footer-nav">
     <li><a href="#trading">Trading</a></li>
     <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#allocation">Allocation</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
 </footer>
 
+<!-- ─── EDIT TOGGLE (lock) ────────────────────────── -->
+<button class="edit-toggle" id="editToggle" title="Toggle edit mode (updates via GitHub)">
+  <span class="lock-icon">🔒</span>
+</button>
+
+<!-- ─── SAVE BUTTON ────────────────────────────────── -->
+<button class="save-btn" id="saveBtn">Save to GitHub</button>
+
+<!-- ─── FEEDBACK ───────────────────────────────────── -->
+<div class="save-feedback" id="saveFeedback"></div>
+
+<!-- ─── TOAST ──────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  CONFIG — EDIT THIS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Your GitHub Personal Access Token (classic) with 'repo' scope.
+// Generate at: https://github.com/settings/tokens
+const GITHUB_TOKEN = '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'; // <-- paste your token here
+
+const GITHUB_USER = 'Riochandra';
+const GITHUB_REPO = 'tradr.'; // note the period
+const GITHUB_BRANCH = 'main';
+const DATA_FILE = 'data.json';
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  STATE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+let allocationData = null;
+let isEditMode = false;
+let isSaving = false;
+let fileSha = null;
+
+const allocList = document.getElementById('allocList');
+const totalPctEl = document.getElementById('allocTotalPct');
+const editToggle = document.getElementById('editToggle');
+const saveBtn = document.getElementById('saveBtn');
+const feedbackEl = document.getElementById('saveFeedback');
+const toastEl = document.getElementById('toast');
+
+// Intersection Observer for scroll‑triggered animation
+let observer = null;
+const allocationSection = document.getElementById('allocation');
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  DEFAULT DATA (fallback)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+const DEFAULT_DATA = {
+  items: [
+    { label: 'USDT', pct: 28.86 },
+    { label: 'USDC', pct: 1.82 },
+    { label: 'HYPE', pct: 20.34 },
+    { label: 'USD', pct: 1.40 },
+    { label: 'BTC', pct: 17.43 },
+    { label: 'IDR', pct: 14.85 },
+    { label: 'ALCPB', pct: 12.36 },
+    { label: 'SGD', pct: 2.88 },
+    { label: 'Other', pct: 0.10 }
+  ],
+  totalValue: 8774.57
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  HELPERS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+function round2(n) { return Math.round(n * 100) / 100; }
+
+function sumPct(items) {
+  return round2(items.reduce((s, i) => s + i.pct, 0));
+}
+
+function sortItems(items) {
+  items.sort((a, b) => b.pct - a.pct);
+}
+
+function showToast(msg, type = '') {
+  toastEl.textContent = msg;
+  toastEl.className = 'toast visible ' + type;
+  clearTimeout(toastEl._hide);
+  toastEl._hide = setTimeout(() => { toastEl.className = 'toast'; }, 3800);
+}
+
+function showFeedback(msg, isError = false) {
+  feedbackEl.textContent = msg;
+  feedbackEl.className = 'save-feedback visible' + (isError ? ' error' : '');
+  clearTimeout(feedbackEl._hide);
+  feedbackEl._hide = setTimeout(() => { feedbackEl.className = 'save-feedback'; }, 3200);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  GITHUB API
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+function githubUrl(path) {
+  return `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${path}`;
+}
+
+async function fetchDataFromGitHub() {
+  try {
+    const res = await fetch(githubUrl(DATA_FILE), {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (!res.ok) {
+      if (res.status === 404) return null;
+      throw new Error(`GitHub fetch error: ${res.status}`);
+    }
+    const data = await res.json();
+    fileSha = data.sha;
+    const content = JSON.parse(atob(data.content));
+    return content;
+  } catch (err) {
+    console.warn('GitHub fetch failed:', err);
+    return null;
+  }
+}
+
+async function pushDataToGitHub(newData) {
+  const payload = {
+    message: `Update allocation data ${new Date().toISOString().slice(0,10)}`,
+    content: btoa(JSON.stringify(newData, null, 2)),
+    branch: GITHUB_BRANCH
+  };
+  if (fileSha) payload.sha = fileSha;
+
+  const res = await fetch(githubUrl(DATA_FILE), {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${GITHUB_TOKEN}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`GitHub push failed (${res.status}): ${errText}`);
+  }
+  const result = await res.json();
+  fileSha = result.content.sha;
+  return result;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ANIMATION — RESET & PLAY
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+function resetBars() {
+  const bars = document.querySelectorAll('.alloc-bar');
+  bars.forEach(bar => {
+    bar.style.width = '0%';
+  });
+}
+
+function animateBars() {
+  const bars = document.querySelectorAll('.alloc-bar');
+  bars.forEach((bar, index) => {
+    const target = parseFloat(bar.dataset.pct) || 0;
+    // Stagger each bar by 80ms
+    setTimeout(() => {
+      bar.style.width = target + '%';
+    }, index * 80);
+  });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  RENDER ALLOCATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+function renderAllocation(items, editMode) {
+  sortItems(items);
+
+  allocList.innerHTML = '';
+  const total = sumPct(items);
+
+  items.forEach((item) => {
+    const div = document.createElement('div');
+    div.className = 'alloc-item' + (editMode ? ' edit-mode' : '');
+
+    const label = document.createElement('span');
+    label.className = 'alloc-label';
+    label.textContent = item.label;
+    div.appendChild(label);
+
+    const barWrap = document.createElement('div');
+    barWrap.className = 'alloc-bar-wrap';
+    const bar = document.createElement('div');
+    bar.className = 'alloc-bar';
+    const pctClamped = Math.min(Math.max(item.pct, 0), 100);
+    bar.dataset.pct = pctClamped;
+    // In edit mode, show full width; otherwise start at 0
+    bar.style.width = editMode ? pctClamped + '%' : '0%';
+    barWrap.appendChild(bar);
+    div.appendChild(barWrap);
+
+    const pctEl = document.createElement('span');
+    pctEl.className = 'alloc-pct';
+
+    if (editMode) {
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.className = 'alloc-pct-input';
+      input.value = item.pct;
+      input.step = '0.01';
+      input.min = '0';
+      input.max = '100';
+      input.dataset.label = item.label;
+
+      input.addEventListener('input', () => {
+        const val = parseFloat(input.value);
+        if (!isNaN(val) && val >= 0) {
+          const targetLabel = input.dataset.label;
+          const targetItem = items.find(it => it.label === targetLabel);
+          if (targetItem) {
+            targetItem.pct = round2(val);
+            const currentLabel = targetItem.label;
+            renderAllocation(items, editMode);
+            const inputs = document.querySelectorAll('.alloc-pct-input');
+            for (let inp of inputs) {
+              if (inp.dataset.label === currentLabel) {
+                inp.focus();
+                inp.setSelectionRange(inp.value.length, inp.value.length);
+                break;
+              }
+            }
+          }
+        }
+      });
+
+      pctEl.appendChild(input);
+      const pctSign = document.createTextNode('%');
+      pctEl.appendChild(pctSign);
+    } else {
+      pctEl.textContent = item.pct.toFixed(2) + '%';
+    }
+    div.appendChild(pctEl);
+    allocList.appendChild(div);
+  });
+
+  totalPctEl.textContent = total.toFixed(2) + '%';
+
+  // Set up observer if not in edit mode
+  if (!editMode) {
+    setupObserver();
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  OBSERVER — triggers animation on entry, resets on exit
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+function setupObserver() {
+  if (observer) observer.disconnect();
+  observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !isEditMode) {
+        animateBars();
+      } else if (!entry.isIntersecting && !isEditMode) {
+        resetBars();
+      }
+    });
+  }, { threshold: 0.3 });
+
+  if (allocationSection) {
+    observer.observe(allocationSection);
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  LOAD DATA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+async function loadData() {
+  let data = null;
+  if (GITHUB_TOKEN && GITHUB_TOKEN !== 'YOUR_GITHUB_PAT_HERE') {
+    try {
+      data = await fetchDataFromGitHub();
+    } catch (_) { /* ignore */ }
+  }
+  if (!data) data = DEFAULT_DATA;
+
+  allocationData = data;
+  sortItems(allocationData.items);
+  renderAllocation(allocationData.items, isEditMode);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SAVE TO GITHUB
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+async function saveToGitHub() {
+  if (!allocationData || isSaving) return;
+  if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_PAT_HERE') {
+    showToast('⚠️ GitHub token not configured.', 'error');
+    showFeedback('Token missing — set GITHUB_TOKEN', true);
+    return;
+  }
+
+  isSaving = true;
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
+  showFeedback('Saving to GitHub…');
+
+  try {
+    if (isEditMode) {
+      const inputs = document.querySelectorAll('.alloc-pct-input');
+      inputs.forEach(inp => {
+        const label = inp.dataset.label;
+        const val = parseFloat(inp.value);
+        if (!isNaN(val) && val >= 0) {
+          const item = allocationData.items.find(it => it.label === label);
+          if (item) item.pct = round2(val);
+        }
+      });
+    }
+
+    sortItems(allocationData.items);
+
+    const payload = {
+      items: allocationData.items,
+      totalValue: allocationData.totalValue
+    };
+
+    await pushDataToGitHub(payload);
+    showFeedback('✓ Saved to GitHub!', false);
+    showToast('✓ Allocation updated on GitHub', 'success');
+
+    isEditMode = false;
+    updateEditModeUI();
+    // Re‑render, bars start at 0, observer will trigger if visible
+    renderAllocation(allocationData.items, false);
+
+  } catch (err) {
+    console.error(err);
+    showFeedback('✗ Error: ' + err.message, true);
+    showToast('✗ Save failed: ' + err.message, 'error');
+  } finally {
+    isSaving = false;
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save to GitHub';
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  EDIT MODE TOGGLE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+function updateEditModeUI() {
+  if (isEditMode) {
+    editToggle.classList.add('active');
+    editToggle.querySelector('.lock-icon').textContent = '🔓';
+    saveBtn.classList.add('visible');
+  } else {
+    editToggle.classList.remove('active');
+    editToggle.querySelector('.lock-icon').textContent = '🔒';
+    saveBtn.classList.remove('visible');
+    feedbackEl.className = 'save-feedback';
+  }
+}
+
+function toggleEditMode() {
+  if (!allocationData) return;
+  isEditMode = !isEditMode;
+  updateEditModeUI();
+  renderAllocation(allocationData.items, isEditMode);
+  if (isEditMode) {
+    const firstInput = document.querySelector('.alloc-pct-input');
+    if (firstInput) setTimeout(() => firstInput.focus(), 100);
+  } else {
+    // After exiting edit mode, if section is visible, animate immediately
+    setTimeout(() => {
+      if (allocationSection && isElementVisible(allocationSection)) {
+        animateBars();
+      }
+    }, 100);
+  }
+}
+
+// helper to check if an element is currently visible in the viewport
+function isElementVisible(el) {
+  const rect = el.getBoundingClientRect();
+  const threshold = 0.3;
+  const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+  return visibleHeight > rect.height * threshold;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  INIT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+async function init() {
+  await loadData();
+
+  editToggle.addEventListener('click', toggleEditMode);
+  saveBtn.addEventListener('click', saveToGitHub);
+
+  let eCount = 0, eTimer = null;
+  document.addEventListener('keydown', (ev) => {
+    if ((ev.key === 'e' || ev.key === 'E') && ev.target.tagName !== 'INPUT') {
+      eCount++;
+      clearTimeout(eTimer);
+      eTimer = setTimeout(() => { eCount = 0; }, 400);
+      if (eCount >= 2) { eCount = 0; toggleEditMode(); }
+    }
+    if (ev.key === 'Escape' && isEditMode) toggleEditMode();
+  });
+
+  if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_PAT_HERE') {
+    setTimeout(() => {
+      showToast('💡 Set GITHUB_TOKEN to enable save', '');
+    }, 2000);
+  }
+}
+
+init().catch(console.error);
+</script>
 </body>
 </html>
