@@ -184,9 +184,17 @@
     .alloc-pct { min-width: 44px; font-size: 12px; }
     .alloc-pct-input { width: 52px; font-size: 12px; }
   }
+
+  /* AURORA */
+  #aurora { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  body > *:not(#aurora) { position: relative; z-index: 1; }
+  .hero::after { display: none; }
 </style>
 </head>
 <body>
+
+<!-- AURORA -->
+<canvas id="aurora"></canvas>
 
 <!-- PASSPHRASE OVERLAY -->
 <div id="pass-overlay">
@@ -382,6 +390,58 @@
     <li><a href="#contact">Contact</a></li>
   </ul>
 </footer>
+
+<!-- ─── AURORA ──────────────────────────────────────────── -->
+<script>
+(function () {
+  const canvas = document.getElementById('aurora');
+  const ctx    = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // orbs: normalised position, radius scale, colour, drift speed, phase offset
+  const orbs = [
+    { x: 0.20, y: 0.25, r: 0.60, col: '201,168,76',  spd: 0.00017, ph: 0.00 }, // gold
+    { x: 0.78, y: 0.50, r: 0.55, col: '20,175,145',  spd: 0.00012, ph: 1.80 }, // teal
+    { x: 0.50, y: 0.85, r: 0.48, col: '201,168,76',  spd: 0.00020, ph: 3.40 }, // gold warm
+    { x: 0.12, y: 0.68, r: 0.42, col: '100,80,200',  spd: 0.00015, ph: 0.90 }, // purple
+    { x: 0.88, y: 0.18, r: 0.44, col: '20,150,170',  spd: 0.00018, ph: 2.60 }, // cyan
+  ];
+
+  const MAX_ALPHA = 0.11; // keep it subtle — raise to taste (e.g. 0.18)
+
+  function draw(ts) {
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    orbs.forEach(o => {
+      const ox = o.x + Math.sin(ts * o.spd + o.ph)          * 0.18;
+      const oy = o.y + Math.cos(ts * o.spd * 0.65 + o.ph + 1) * 0.14;
+      const cx = ox * W, cy = oy * H;
+      const r  = o.r * Math.max(W, H);
+
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      g.addColorStop(0,   `rgba(${o.col},${MAX_ALPHA})`);
+      g.addColorStop(0.45,`rgba(${o.col},${MAX_ALPHA * 0.45})`);
+      g.addColorStop(1,   `rgba(${o.col},0)`);
+
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  requestAnimationFrame(draw);
+})();
+</script>
 
 <!-- ─── FIREBASE + APP LOGIC ──────────────────────────── -->
 <script type="module">
