@@ -695,59 +695,85 @@ async function resolveBinancePair(symbol){
   throw new Error('No active Binance USDT pair found for '+clean+'.');
 }
 
-// Resolve a cash currency to a USD conversion automatically.
-// We first try CUR/USD; if the provider quotes USD/CUR instead, we invert it.
+// Yahoo uses both standard FX pairs (e.g. EURUSD=X) and legacy
+// currency tickers (e.g. CAD=X for USD/CAD). Try both quote conventions.
+function fxCandidates(currency, preferredPair=null, preferredInvert=false){
+  const cur=currency.replace(/[^A-Z]/g,'').toUpperCase();
+  const candidates=[];
+  const add=(pair,invert)=>{
+    if(pair && !candidates.some(x=>x.pair===pair)) candidates.push({pair,invert});
+  };
+  if(preferredPair) add(preferredPair,preferredInvert);
+  add(cur+'USD=X',false);       // USD per 1 unit of currency
+  add('USD'+cur+'=X',true);     // currency per 1 USD
+  add(cur+'=X',true);           // Yahoo legacy ticker: usually USD per currency unit reciprocal
+  return candidates;
+}
+
+async function fetchFxQuote(currency, preferredPair=null, preferredInvert=false){
+  const cur=currency.replace(/[^A-Z]/g,'').toUpperCase();
+  if(cur==='USD') return {pair:'USDUSD',invert:false,price:1};
+  for(const candidate of fxCandidates(cur,preferredPair,preferredInvert)){
+    try{
+      const price=await fetchYahoo(candidate.pair);
+      if(typeof price==='number' && Number.isFinite(price) && price>0)
+        return {...candidate,price};
+    }catch(e){ /* try the next Yahoo symbol convention */ }
+  }
+  throw new Error('No Yahoo USD conversion found for '+cur+'. Tried standard and legacy Yahoo FX symbols.');
+}
+
 async function resolveFx(symbol){
   const cur=symbol.replace(/[^A-Z]/g,'').toUpperCase();
   if(!/^[A-Z]{3}$/.test(cur)) throw new Error('FX / cash symbol must be a 3-letter currency code, e.g. JPY.');
   if(cur==='USD') return {pair:'USDUSD',invert:false,source:'USD peg'};
-
-  const direct=cur+'USD=X';
-  try{
-    const price=await fetchYahoo(direct);
-    if(typeof price==='number' && price>0) return {pair:direct,invert:false,source:'Yahoo FX'};
-  }catch(e){}
-
-  const inverse='USD'+cur+'=X';
-  try{
-    const price=await fetchYahoo(inverse);
-    if(typeof price==='number' && price>0) return {pair:inverse,invert:true,source:'Yahoo FX · inverted'};
-  }catch(e){}
-
-  throw new Error('No Yahoo USD conversion found for '+cur+'.');
+  const quote=await fetchFxQuote(cur);
+  return {pair:quote.pair,invert:quote.invert,source:quote.invert?'Yahoo FX · inverted':'Yahoo FX'};
 }
 
 async function refreshYahoo(){
-  try{
-    const fx=portfolioData.holdings.filter(h=>h.feed==='YAHOO' && h.pair);
-    if(!fx.length) return;
-    const quotes=await Promise.allSettled(fx.map(async h=>({h,price:await fetchYahoo(h.pair)})));
-    let successCount=0;
-    quotes.forEach(result=>{
-      if(result.status!=='fulfilled') return;
-      const {h,price}=result.value;
-      if(h.symbol==='ALCPB'){
-        const eurUsd=prices.EUR?.usd;
-        prices.ALCPB={usd:eurUsd ? price*eurUsd : price,quote:price,source:'Yahoo · Euronext'};
-      } else {
-        const usdPrice=h.invert ? 1/price : price;
-        prices[h.symbol]={usd:usdPrice,quote:price,source:h.invert?'Yahoo FX · inverted':'Yahoo FX'};
-      }
-      successCount++;
-    });
-    if(successCount) {
-      lastMarketUpdate=new Date();
-      setFeed('live',successCount+' FX quote'+(successCount===1?'':'s')+' active');
-    } else {
-      throw new Error('No FX quotes available');
+  const yahooHoldings=portfolioData.holdings.filter(h=>h.feed==='YAHOO' && h.pair);
+  if(!yahooHoldings.length) return;
+  const quotes=await Promise.allSettled(yahooHoldings.map(async h=>{
+    if(h.type==='fx' || h.type==='cash'){
+      const quote=await fetchFxQuote(h.symbol,h.pair,h.invert||false);
+      return {h,...quote};
     }
-  }catch(e){
-    console.warn('Quote refresh failed:',e);
-    setFeed('error','Some feeds unavailable');
+    return {h,pair:h.pair,invert:false,price:await fetchYahoo(h.pair)};
+  }));
+  let successCount=0;
+  // Process FX first so equities quoted in EUR can use the freshly fetched EUR/USD rate.
+  quotes.forEach(result=>{
+    if(result.status!=='fulfilled') return;
+    const {h,pair,invert,price}=result.value;
+    if(h.type==='fx' || h.type==='cash'){
+      h.pair=pair; h.invert=invert;
+      const usdPrice=invert?1/price:price;
+      prices[h.symbol]={usd:usdPrice,quote:price,source:invert?'Yahoo FX · inverted':'Yahoo FX'};
+      successCount++;
+    }
+  });
+  quotes.forEach(result=>{
+    if(result.status!=='fulfilled') return;
+    const {h,price}=result.value;
+    if(h.symbol==='ALCPB'){
+      const eurUsd=prices.EUR?.usd;
+      prices.ALCPB={usd:eurUsd?price*eurUsd:price,quote:price,source:'Yahoo · Euronext'};
+      successCount++;
+    }
+  });
+  const failures=quotes.filter(x=>x.status==='rejected').length;
+  if(successCount){
+    lastMarketUpdate=new Date();
+    setFeed(failures?'error':'live',failures?successCount+' quote'+(successCount===1?'':'s')+' active · '+failures+' unavailable':successCount+' FX quote'+(successCount===1?'':'s')+' active');
+    // Refresh the USD values and allocation chart when quotes arrive. The render
+    // guard preserves any input currently being edited.
     render();
+  }else{
+    setFeed('error','Some feeds unavailable');
+    console.warn('No Yahoo quotes available:',quotes.filter(x=>x.status==='rejected').map(x=>x.reason));
   }
 }
-
 $('btnAddAsset').addEventListener('click',()=>{
   $('addAssetBox').classList.toggle('open');
   if($('addAssetBox').classList.contains('open')) $('newAssetSymbol').focus();
