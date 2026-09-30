@@ -140,6 +140,21 @@
   .legend-symbol { font-family:'Space Mono',monospace; font-size:10px; color:var(--text); }
   .legend-value { font-family:'Space Mono',monospace; font-size:9px; color:var(--muted); text-align:right; }
   .allocation-note { margin-top:16px; font-family:'Space Mono',monospace; font-size:8px; line-height:1.65; color:var(--dim); }
+  .allocation-filter-bar { margin-top:20px; padding:13px 14px; border:.5px solid var(--border); background:var(--surface); }
+  .allocation-filter-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .allocation-filter-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.13em; text-transform:uppercase; color:var(--text); }
+  .allocation-filter-meta { font-family:'Space Mono',monospace; font-size:8px; color:var(--dim); }
+  .allocation-filter-actions { display:flex; gap:6px; margin-top:9px; }
+  .allocation-filter-action { border:.5px solid var(--border2); background:none; color:var(--muted); padding:5px 8px; font-family:'Space Mono',monospace; font-size:7px; text-transform:uppercase; letter-spacing:.08em; cursor:pointer; }
+  .allocation-filter-action:hover { color:var(--text); border-color:var(--gold); }
+  .allocation-filter-list { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .allocation-filter-chip { display:inline-flex; align-items:center; gap:6px; border:.5px solid var(--border2); background:var(--black); color:var(--muted); padding:6px 8px; cursor:pointer; user-select:none; }
+  .allocation-filter-chip input { position:absolute; opacity:0; pointer-events:none; }
+  .allocation-filter-chip .filter-dot { width:7px; height:7px; border-radius:50%; background:var(--dim); flex:0 0 auto; }
+  .allocation-filter-chip .filter-symbol { font-family:'Space Mono',monospace; font-size:8px; }
+  .allocation-filter-chip.active { color:var(--text); border-color:rgba(201,168,76,.55); background:var(--gold-soft); }
+  .allocation-filter-chip.active .filter-dot { background:var(--gold); }
+  .allocation-filter-empty { font-family:'Space Mono',monospace; font-size:8px; color:var(--dim); padding:3px 0; }
 
   /* ADD ASSET */
   .add-asset-row { display:flex; justify-content:flex-end; margin:14px 0 0; }
@@ -393,7 +408,19 @@
     <div class="allocation-panel" id="allocation">
       <div class="portfolio-kicker">Current allocation</div>
       <h2 class="allocation-headline">Where the<br /><em>money sits.</em></h2>
-      <p class="allocation-sub">The pie chart is calculated from live USD market value — not manually entered percentages.</p>
+      <p class="allocation-sub">The pie chart is calculated from live USD market value. Select the assets you want to compare — the selected assets are always normalized to 100%.</p>
+
+      <div class="allocation-filter-bar">
+        <div class="allocation-filter-head">
+          <span class="allocation-filter-label">Show in chart</span>
+          <span class="allocation-filter-meta" id="allocationFilterMeta">All assets</span>
+        </div>
+        <div class="allocation-filter-actions">
+          <button type="button" class="allocation-filter-action" id="allocationSelectAll">All</button>
+          <button type="button" class="allocation-filter-action" id="allocationSelectNone">None</button>
+        </div>
+        <div class="allocation-filter-list" id="allocationFilterList"></div>
+      </div>
 
       <div class="pie-wrap">
         <div class="pie-chart" id="portfolioPie"></div>
@@ -404,7 +431,7 @@
       </div>
 
       <div class="allocation-legend" id="allocationLegend"></div>
-      <div class="allocation-note">Allocation updates whenever a live price or holding input changes.</div>
+      <div class="allocation-note">Only selected assets are included. Their USD values are re-normalized to 100%, so each percentage is relative to the selected basket.</div>
     </div>
   </div>
 </section>
@@ -481,6 +508,7 @@ const DEFAULT_HOLDINGS = [
 
 let portfolioData = { holdings: structuredClone(DEFAULT_HOLDINGS), updatedAt:null };
 let prices = {};
+let allocationSelection = {};
 let ws = null;
 let fxTimer = null;
 let yahooTimer = null;
@@ -599,28 +627,104 @@ function formatLivePrice(h,v){
   return '$'+v.toLocaleString('en-US',{maximumFractionDigits:2});
 }
 
+function loadAllocationSelection(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('tradrAllocationSelection')||'null');
+    if(saved && typeof saved==='object') allocationSelection=saved;
+  }catch{}
+}
+
+function saveAllocationSelection(){
+  try{ localStorage.setItem('tradrAllocationSelection',JSON.stringify(allocationSelection)); }catch{}
+}
+
+function syncAllocationSelection(){
+  const symbols=new Set(portfolioData.holdings.map(h=>h.symbol));
+  // New assets default to selected; removed assets are discarded from the filter state.
+  portfolioData.holdings.forEach(h=>{
+    if(typeof allocationSelection[h.symbol]!=='boolean') allocationSelection[h.symbol]=true;
+  });
+  Object.keys(allocationSelection).forEach(symbol=>{
+    if(!symbols.has(symbol)) delete allocationSelection[symbol];
+  });
+}
+
+function renderAllocationFilters(){
+  syncAllocationSelection();
+  const list=$('allocationFilterList');
+  if(!list) return;
+  list.innerHTML='';
+  portfolioData.holdings.forEach(h=>{
+    const label=document.createElement('label');
+    label.className='allocation-filter-chip'+(allocationSelection[h.symbol]?' active':'');
+    label.title='Toggle '+h.symbol+' in allocation chart';
+    label.innerHTML=`<input type="checkbox" data-allocation-symbol="${h.symbol}" ${allocationSelection[h.symbol]?'checked':''}><span class="filter-dot"></span><span class="filter-symbol">${h.symbol}</span>`;
+    label.querySelector('input').addEventListener('change',e=>{
+      allocationSelection[h.symbol]=e.target.checked;
+      saveAllocationSelection();
+      render();
+    });
+    list.appendChild(label);
+  });
+  const selected=portfolioData.holdings.filter(h=>allocationSelection[h.symbol]).length;
+  const total=portfolioData.holdings.length;
+  $('allocationFilterMeta').textContent=selected===total ? 'All assets' : `${selected} of ${total} selected`;
+}
+
 function renderPie(values,total){
   const colors=['#C9A84C','#4CAF6F','#6C8CFF','#C76BFF','#D97A4A','#55B7B0','#D7D05B','#E07B9A','#8A8A8A'];
+  syncAllocationSelection();
+  renderAllocationFilters();
+
+  // Only selected assets participate in the denominator. Therefore the selected
+  // slices always sum to exactly 100% of the chart, regardless of what is hidden.
+  const selectedValues=values.filter(x=>allocationSelection[x.h.symbol] && x.value>0);
+  const selectedTotal=selectedValues.reduce((sum,x)=>sum+x.value,0);
   let cursor=0, stops=[];
-  values.filter(x=>x.value>0).forEach(({h,value},i)=>{
-    const a=value/total*360;
-    stops.push(`${colors[i%colors.length]} ${cursor}deg ${cursor+a}deg`);
-    cursor+=a;
+  selectedValues.forEach(({h,value})=>{
+    const a=selectedTotal ? value/selectedTotal*360 : 0;
+    const color=colors[Math.max(0,portfolioData.holdings.findIndex(x=>x.symbol===h.symbol))%colors.length];
+    if(a>0){
+      stops.push(`${color} ${cursor}deg ${cursor+a}deg`);
+      cursor+=a;
+    }
   });
   $('portfolioPie').style.background=stops.length ? `conic-gradient(${stops.join(',')})` : 'var(--surface2)';
-  $('pieTotal').textContent=compactMoney(total);
+  $('pieTotal').textContent=compactMoney(selectedTotal);
+  $('pieTotal').previousElementSibling.textContent=selectedValues.length ? 'Selected' : 'No assets';
 
   const legend=$('allocationLegend');
   legend.innerHTML='';
-  values.filter(x=>x.value>0).sort((a,b)=>b.value-a.value).forEach(({h,value},i)=>{
+  selectedValues.slice().sort((a,b)=>b.value-a.value).forEach(({h,value})=>{
+    const color=colors[Math.max(0,portfolioData.holdings.findIndex(x=>x.symbol===h.symbol))%colors.length];
     const row=document.createElement('div');
     row.className='legend-row';
-    row.innerHTML=`<span class="legend-swatch" style="background:${colors[i%colors.length]}"></span>
+    row.innerHTML=`<span class="legend-swatch" style="background:${color}"></span>
       <span class="legend-symbol">${h.symbol}</span>
-      <span class="legend-value">${money(value)} · ${pct(total?value/total*100:0)}</span>`;
+      <span class="legend-value">${money(value)} · ${pct(selectedTotal?value/selectedTotal*100:0)}</span>`;
     legend.appendChild(row);
   });
+  if(!selectedValues.length){
+    const row=document.createElement('div');
+    row.className='legend-row';
+    row.innerHTML='<span></span><span class="legend-symbol">Select at least one asset</span><span class="legend-value">—</span>';
+    legend.appendChild(row);
+  }
 }
+
+$('allocationSelectAll').addEventListener('click',()=>{
+  portfolioData.holdings.forEach(h=>allocationSelection[h.symbol]=true);
+  saveAllocationSelection();
+  render();
+});
+
+$('allocationSelectNone').addEventListener('click',()=>{
+  portfolioData.holdings.forEach(h=>allocationSelection[h.symbol]=false);
+  saveAllocationSelection();
+  render();
+});
+
+loadAllocationSelection();
 
 function bindInputs(){
   document.querySelectorAll('.holding-input').forEach(input=>{
