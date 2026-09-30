@@ -352,14 +352,14 @@
           <div class="summary-meta" id="portfolioLastUpdate">Market update —</div>
         </div>
         <div class="summary-cell">
-          <div class="summary-label">Cost Basis · USD</div>
+          <div class="summary-label">Invested Cost Basis · USD</div>
           <div class="summary-value" id="portfolioCostBasis">$0.00</div>
-          <div class="summary-meta">Holding × average buy</div>
+          <div class="summary-meta">Only assets with an Avg Buy</div>
         </div>
         <div class="summary-cell">
           <div class="summary-label">Floating P/L · USD</div>
           <div class="summary-value" id="portfolioPnl">$0.00</div>
-          <div class="summary-meta" id="portfolioPnlPct">0.00%</div>
+          <div class="summary-meta" id="portfolioPnlPct">0.00% of invested cost</div>
         </div>
       </div>
 
@@ -561,15 +561,28 @@ function render(force=false){
   rows.innerHTML='';
   const values=portfolioData.holdings.map(h=>({h,value:(h.holding||0)*(prices[h.symbol]?.usd ?? fallbackPrice(h))}));
   const total=values.reduce((a,x)=>a+x.value,0);
-  const cost=portfolioData.holdings.reduce((a,h)=>a+(isCashAsset(h)?0:(h.holding||0)*(h.avgBuy||0)),0);
-  const pnl=total-cost;
+
+  // Cash/FX is part of portfolio value and allocation, but it has no cost
+  // basis in this journal. Therefore it must contribute $0 to P/L rather
+  // than being treated as profit simply because its cost basis is blank.
+  // Only assets with an Avg Buy (crypto/equities/stablecoins, etc.)
+  // contribute to invested cost basis and floating P/L.
+  const cost=portfolioData.holdings.reduce((a,h)=>{
+    if(isCashAsset(h)) return a;
+    return a+(h.holding||0)*(h.avgBuy||0)*costToUsdMultiplier(h);
+  },0);
+  const pnl=values.reduce((a,{h,value})=>{
+    if(isCashAsset(h)) return a;
+    const costUsd=(h.holding||0)*(h.avgBuy||0)*costToUsdMultiplier(h);
+    return a+(value-costUsd);
+  },0);
   const pnlPct=cost ? pnl/cost*100 : 0;
 
   values.forEach(({h,value})=>{
     const p=prices[h.symbol];
     const live=p?.usd ?? fallbackPrice(h);
-    const costUsd=isCashAsset(h)?value:(h.holding||0)*(h.avgBuy||0)*costToUsdMultiplier(h);
-    const itemPnl=value-costUsd;
+    const costUsd=isCashAsset(h) ? 0 : (h.holding||0)*(h.avgBuy||0)*costToUsdMultiplier(h);
+    const itemPnl=isCashAsset(h) ? 0 : value-costUsd;
     const weight=total ? value/total*100 : 0;
     const tr=document.createElement('tr');
     tr.innerHTML=`
