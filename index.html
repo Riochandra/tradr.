@@ -95,14 +95,17 @@
   .summary-meta { font-family:'Space Mono',monospace; font-size:8px; color:var(--dim); margin-top:7px; }
 
   .holdings-table-wrap { overflow-x:auto; border-top:0.5px solid var(--border); }
-  .holdings-table { width:100%; border-collapse:collapse; min-width:760px; }
-  .holdings-table th { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.13em; text-transform:uppercase; color:var(--dim); font-weight:400; text-align:right; padding:12px 8px; border-bottom:.5px solid var(--border); }
+  .holdings-table { width:100%; border-collapse:collapse; min-width:0; table-layout:fixed; }
+  .holdings-table th { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.11em; text-transform:uppercase; color:var(--dim); font-weight:400; text-align:right; padding:12px 6px; border-bottom:.5px solid var(--border); }
+  .holdings-table th:nth-child(1){width:16%}.holdings-table th:nth-child(2){width:14%}.holdings-table th:nth-child(3){width:13%}.holdings-table th:nth-child(4){width:15%}.holdings-table th:nth-child(5){width:15%}.holdings-table th:nth-child(6){width:12%}.holdings-table th:nth-child(7){width:8%}.holdings-table th:nth-child(8){width:7%}
   .holdings-table th:first-child,.holdings-table th:nth-child(2) { text-align:left; }
-  .holdings-table td { padding:12px 8px; border-bottom:.5px solid var(--border); text-align:right; vertical-align:middle; }
+  .holdings-table td { padding:12px 6px; border-bottom:.5px solid var(--border); text-align:right; vertical-align:middle; overflow:hidden; }
   .holdings-table td:first-child,.holdings-table td:nth-child(2) { text-align:left; }
   .holding-symbol { font-family:'Space Mono',monospace; font-size:12px; font-weight:700; color:var(--text); }
   .holding-name { font-size:11px; color:var(--muted); margin-top:2px; }
-  .holding-price { font-family:'Space Mono',monospace; font-size:11px; color:var(--text); }
+  .holding-price { font-family:'Space Mono',monospace; font-size:11px; color:var(--text); white-space:nowrap; }
+  .cash-na { font-family:'Space Mono',monospace; font-size:10px; color:var(--dim); }
+  .cash-value { color:var(--gold); font-weight:600; }
   .holding-feed { display:block; font-family:'Space Mono',monospace; font-size:7px; color:var(--dim); margin-top:2px; text-transform:uppercase; }
   .holding-input { width:108px; background:transparent; border:.5px solid var(--border2); color:var(--gold); padding:7px 8px; font-family:'Space Mono',monospace; font-size:11px; text-align:right; outline:none; }
   .holding-input:focus { border-color:var(--gold); background:var(--gold-soft); }
@@ -320,7 +323,7 @@
         <div>
           <div class="portfolio-kicker">Live mark-to-market</div>
           <h2 class="portfolio-title">Current <em style="font-style:normal;color:var(--gold)">portfolio value.</em></h2>
-          <p class="portfolio-sub">Edit only your <strong style="color:var(--text);font-weight:400">holding</strong> and <strong style="color:var(--text);font-weight:400">average buy</strong>. Market prices and USD FX conversion update automatically.</p>
+          <p class="portfolio-sub">Edit your <strong style="color:var(--text);font-weight:400">holding</strong>. For crypto/equities, average buy is optional; for foreign cash, USD value is calculated directly from the live FX rate.</p>
         </div>
         <div class="feed-status"><span class="feed-dot" id="portfolioFeedDot"></span><span id="portfolioFeedStatus">Connecting</span></div>
       </div>
@@ -348,10 +351,10 @@
           <thead>
             <tr>
               <th>Asset</th>
-              <th>Live Price · USD</th>
+              <th>USD Rate</th>
               <th>Holding</th>
-              <th>Avg Buy / Unit · USD</th>
-              <th>Current Value</th>
+              <th>Current Value · USD</th>
+              <th>Avg Buy / Unit</th>
               <th>Floating P/L</th>
               <th>Weight</th>
               <th></th>
@@ -528,14 +531,14 @@ function render(force=false){
   rows.innerHTML='';
   const values=portfolioData.holdings.map(h=>({h,value:(h.holding||0)*(prices[h.symbol]?.usd ?? fallbackPrice(h))}));
   const total=values.reduce((a,x)=>a+x.value,0);
-  const cost=portfolioData.holdings.reduce((a,h)=>a+(h.holding||0)*(h.avgBuy||0),0);
+  const cost=portfolioData.holdings.reduce((a,h)=>a+(isCashAsset(h)?0:(h.holding||0)*(h.avgBuy||0)),0);
   const pnl=total-cost;
   const pnlPct=cost ? pnl/cost*100 : 0;
 
   values.forEach(({h,value})=>{
     const p=prices[h.symbol];
     const live=p?.usd ?? fallbackPrice(h);
-    const costUsd=(h.holding||0)*(h.avgBuy||0)*costToUsdMultiplier(h);
+    const costUsd=isCashAsset(h)?value:(h.holding||0)*(h.avgBuy||0)*costToUsdMultiplier(h);
     const itemPnl=value-costUsd;
     const weight=total ? value/total*100 : 0;
     const tr=document.createElement('tr');
@@ -543,9 +546,9 @@ function render(force=false){
       <td><div class="holding-symbol">${h.symbol}${h.custom?'<span class="custom-badge">CUSTOM</span>':''}</div><div class="holding-name">${h.name}</div></td>
       <td><span class="holding-price">${formatLivePrice(h,live)}</span><span class="holding-feed">${p?.source || sourceLabel(h)}</span></td>
       <td><input class="holding-input" data-field="holding" data-symbol="${h.symbol}" type="number" min="0" step="any" value="${h.holding ?? 0}" /></td>
-      <td><input class="holding-input" data-field="avgBuy" data-symbol="${h.symbol}" type="number" min="0" step="any" value="${h.avgBuy ?? 0}" /></td>
-      <td class="holding-price">${money(value)}</td>
-      <td class="pnl ${itemPnl>=0?'positive':'negative'}">${itemPnl>=0?'+':''}${money(itemPnl)}</td>
+      <td class="holding-price cash-value">${money(value)}</td>
+      <td>${isCashAsset(h) ? '<span class="cash-na">—</span>' : '<input class="holding-input" data-field="avgBuy" data-symbol="'+h.symbol+'" type="number" min="0" step="any" value="'+(h.avgBuy ?? 0)+'" />'}</td>
+      <td class="pnl ${itemPnl>=0?'positive':'negative'}">${isCashAsset(h)?'<span class="cash-na">—</span>':(itemPnl>=0?'+':'')+money(itemPnl)}</td>
       <td class="alloc-pct-live">${pct(weight)}</td>
       <td><button class="remove-asset" data-remove-symbol="${h.symbol}" title="Delete ${h.symbol}">× Delete</button></td>`;
     rows.appendChild(tr);
@@ -580,6 +583,7 @@ function sourceLabel(h){
   if(h.feed==='YAHOO') return 'Yahoo quote';
   return h.feed;
 }
+function isCashAsset(h){ return h.type==='fx' || h.type==='cash'; }
 function fallbackPrice(h){
   if(h.symbol==='USD'||h.symbol==='USDT'||h.symbol==='USDC') return 1;
   return 0;
@@ -717,8 +721,11 @@ async function refreshYahoo(){
   try{
     const fx=portfolioData.holdings.filter(h=>h.feed==='YAHOO' && h.pair);
     if(!fx.length) return;
-    const quotes=await Promise.all(fx.map(async h=>({h,price:await fetchYahoo(h.pair)})));
-    quotes.forEach(({h,price})=>{
+    const quotes=await Promise.allSettled(fx.map(async h=>({h,price:await fetchYahoo(h.pair)})));
+    let successCount=0;
+    quotes.forEach(result=>{
+      if(result.status!=='fulfilled') return;
+      const {h,price}=result.value;
       if(h.symbol==='ALCPB'){
         const eurUsd=prices.EUR?.usd;
         prices.ALCPB={usd:eurUsd ? price*eurUsd : price,quote:price,source:'Yahoo · Euronext'};
@@ -726,9 +733,14 @@ async function refreshYahoo(){
         const usdPrice=h.invert ? 1/price : price;
         prices[h.symbol]={usd:usdPrice,quote:price,source:h.invert?'Yahoo FX · inverted':'Yahoo FX'};
       }
+      successCount++;
     });
-    lastMarketUpdate=new Date();
-    setFeed('live','Mixed feeds active');
+    if(successCount) {
+      lastMarketUpdate=new Date();
+      setFeed('live',successCount+' FX quote'+(successCount===1?'':'s')+' active');
+    } else {
+      throw new Error('No FX quotes available');
+    }
   }catch(e){
     console.warn('Quote refresh failed:',e);
     setFeed('error','Some feeds unavailable');
