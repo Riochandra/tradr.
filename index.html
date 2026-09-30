@@ -376,7 +376,7 @@
           <div class="asset-field"><label>Market Feed</label><div id="newAssetFeedPreview" class="asset-feed-preview">AUTO-DETECT</div></div>
           <button class="btn-portfolio primary" id="btnConfirmAsset">Add</button>
         </div>
-        <div class="feed-note" style="margin-top:12px">Crypto pair = <strong>Binance USDT pair</strong> (e.g. SOLUSDT). FX pair = <strong>Yahoo Finance USD pair</strong> (e.g. EURUSD=X). Holding and average buy can be entered immediately after adding.</div>
+        <div class="feed-note" style="margin-top:12px">Crypto pair = <strong>Binance USDT pair</strong> (e.g. SOLUSDT). FX conversion = <strong>Frankfurter / central-bank rates</strong> → USD. Holding is all you need for foreign cash; average buy is not used.</div>
       </div>
 
       <div class="portfolio-actions">
@@ -473,10 +473,10 @@ const DEFAULT_HOLDINGS = [
   { symbol:'ALCPB', name:'Capital B',      type:'equity',  feed:'YAHOO',   pair:'ALCPB.PA',unit:'share',holding:0, avgBuy:0, quote:'EUR' },
   { symbol:'USDT',  name:'Tether',         type:'stable',  feed:'PEG',    pair:'USDTUSD', unit:'USDT',  holding:0, avgBuy:1 },
   { symbol:'USDC',  name:'USD Coin',       type:'stable',  feed:'PEG',    pair:'USDCUSD', unit:'USDC',  holding:0, avgBuy:1 },
-  { symbol:'EUR',   name:'Euro cash',      type:'fx',      feed:'YAHOO',  pair:'EURUSD=X',unit:'EUR',   holding:0, avgBuy:0 },
-  { symbol:'CAD',   name:'Canadian dollar',type:'fx',      feed:'YAHOO',  pair:'CADUSD=X',unit:'CAD',   holding:0, avgBuy:0 },
+  { symbol:'EUR',   name:'Euro cash',      type:'fx',      feed:'FRANKFURTER', pair:'EURUSD', unit:'EUR', holding:0, avgBuy:0 },
+  { symbol:'CAD',   name:'Canadian dollar',type:'fx',      feed:'FRANKFURTER', pair:'CADUSD', unit:'CAD', holding:0, avgBuy:0 },
   { symbol:'USD',   name:'US dollar cash', type:'cash',    feed:'PEG',    pair:'USDUSD', unit:'USD',   holding:0, avgBuy:1 },
-  { symbol:'IDR',   name:'Indonesian rupiah',type:'fx',    feed:'YAHOO',  pair:'IDRUSD=X',unit:'IDR',   holding:0, avgBuy:0 }
+  { symbol:'IDR',   name:'Indonesian rupiah',type:'fx',    feed:'FRANKFURTER', pair:'IDRUSD', unit:'IDR', holding:0, avgBuy:0 }
 ];
 
 let portfolioData = { holdings: structuredClone(DEFAULT_HOLDINGS), updatedAt:null };
@@ -562,7 +562,7 @@ function render(force=false){
       delete prices[symbol];
       render();
       connectBinance();
-      refreshYahoo();
+      refreshMarketFeeds();
     });
   });
 
@@ -581,6 +581,7 @@ function sourceLabel(h){
   if(h.feed==='BINANCE') return 'Binance live';
   if(h.feed==='PEG') return 'USD peg';
   if(h.feed==='YAHOO') return 'Yahoo quote';
+  if(h.feed==='FRANKFURTER') return 'Frankfurter FX';
   return h.feed;
 }
 function isCashAsset(h){ return h.type==='fx' || h.type==='cash'; }
@@ -695,64 +696,61 @@ async function resolveBinancePair(symbol){
   throw new Error('No active Binance USDT pair found for '+clean+'.');
 }
 
-// Yahoo uses both standard FX pairs (e.g. EURUSD=X) and legacy
-// currency tickers (e.g. CAD=X for USD/CAD). Try both quote conventions.
-function fxCandidates(currency, preferredPair=null, preferredInvert=false){
-  const cur=currency.replace(/[^A-Z]/g,'').toUpperCase();
-  const candidates=[];
-  const add=(pair,invert)=>{
-    if(pair && !candidates.some(x=>x.pair===pair)) candidates.push({pair,invert});
-  };
-  if(preferredPair) add(preferredPair,preferredInvert);
-  add(cur+'USD=X',false);       // USD per 1 unit of currency
-  add('USD'+cur+'=X',true);     // currency per 1 USD
-  add(cur+'=X',true);           // Yahoo legacy ticker: usually USD per currency unit reciprocal
-  return candidates;
-}
-
-async function fetchFxQuote(currency, preferredPair=null, preferredInvert=false){
-  const cur=currency.replace(/[^A-Z]/g,'').toUpperCase();
-  if(cur==='USD') return {pair:'USDUSD',invert:false,price:1};
-  for(const candidate of fxCandidates(cur,preferredPair,preferredInvert)){
-    try{
-      const price=await fetchYahoo(candidate.pair);
-      if(typeof price==='number' && Number.isFinite(price) && price>0)
-        return {...candidate,price};
-    }catch(e){ /* try the next Yahoo symbol convention */ }
+// Foreign-currency cash uses Frankfurter instead of Yahoo Finance.
+// Frankfurter provides free daily FX rates from central banks / official sources,
+// with no API key. We request USD as the base, then invert the quote so each
+// foreign-currency unit is expressed in USD.
+async function fetchFrankfurterFxRates(currencies){
+  const clean=[...new Set(currencies.map(c=>c.replace(/[^A-Z]/g,'').toUpperCase()).filter(c=>/^[A-Z]{3}$/.test(c) && c!=='USD'))];
+  const rates={USD:1};
+  if(!clean.length) return rates;
+  const url='https://api.frankfurter.dev/v2/rates?base=USD&quotes='+encodeURIComponent(clean.join(','));
+  const r=await fetch(url,{cache:'no-store'});
+  if(!r.ok) throw new Error('Frankfurter FX request failed ('+r.status+').');
+  const rows=await r.json();
+  for(const row of rows){
+    if(row && row.quote && typeof row.rate==='number' && Number.isFinite(row.rate) && row.rate>0){
+      rates[row.quote.toUpperCase()]=1/row.rate;
+    }
   }
-  throw new Error('No Yahoo USD conversion found for '+cur+'. Tried standard and legacy Yahoo FX symbols.');
+  return rates;
 }
 
 async function resolveFx(symbol){
   const cur=symbol.replace(/[^A-Z]/g,'').toUpperCase();
   if(!/^[A-Z]{3}$/.test(cur)) throw new Error('FX / cash symbol must be a 3-letter currency code, e.g. JPY.');
   if(cur==='USD') return {pair:'USDUSD',invert:false,source:'USD peg'};
-  const quote=await fetchFxQuote(cur);
-  return {pair:quote.pair,invert:quote.invert,source:quote.invert?'Yahoo FX · inverted':'Yahoo FX'};
+  const rates=await fetchFrankfurterFxRates([cur]);
+  if(typeof rates[cur]!=='number') throw new Error('Frankfurter has no USD conversion for '+cur+'.');
+  return {pair:cur+'USD',invert:false,source:'Frankfurter FX'};
+}
+
+async function refreshFx(){
+  const fxHoldings=portfolioData.holdings.filter(h=>h.type==='fx' || h.type==='cash');
+  if(!fxHoldings.length) return 0;
+  const rates=await fetchFrankfurterFxRates(fxHoldings.map(h=>h.symbol));
+  let successCount=0;
+  for(const h of fxHoldings){
+    const usd=typeof rates[h.symbol]==='number' ? rates[h.symbol] : (h.symbol==='USD'?1:null);
+    if(typeof usd==='number' && Number.isFinite(usd) && usd>0){
+      h.feed=h.symbol==='USD' ? 'PEG' : 'FRANKFURTER';
+      h.pair=h.symbol==='USD' ? 'USDUSD' : h.symbol+'USD';
+      h.invert=false;
+      prices[h.symbol]={usd,source:h.symbol==='USD'?'USD peg':'Frankfurter FX'};
+      successCount++;
+    } else {
+      delete prices[h.symbol];
+      console.warn('No Frankfurter USD conversion found for',h.symbol);
+    }
+  }
+  return successCount;
 }
 
 async function refreshYahoo(){
-  const yahooHoldings=portfolioData.holdings.filter(h=>h.feed==='YAHOO' && h.pair);
+  const yahooHoldings=portfolioData.holdings.filter(h=>h.feed==='YAHOO' && h.type!=='fx' && h.type!=='cash' && h.pair);
   if(!yahooHoldings.length) return;
-  const quotes=await Promise.allSettled(yahooHoldings.map(async h=>{
-    if(h.type==='fx' || h.type==='cash'){
-      const quote=await fetchFxQuote(h.symbol,h.pair,h.invert||false);
-      return {h,...quote};
-    }
-    return {h,pair:h.pair,invert:false,price:await fetchYahoo(h.pair)};
-  }));
+  const quotes=await Promise.allSettled(yahooHoldings.map(async h=>({h,price:await fetchYahoo(h.pair)})));
   let successCount=0;
-  // Process FX first so equities quoted in EUR can use the freshly fetched EUR/USD rate.
-  quotes.forEach(result=>{
-    if(result.status!=='fulfilled') return;
-    const {h,pair,invert,price}=result.value;
-    if(h.type==='fx' || h.type==='cash'){
-      h.pair=pair; h.invert=invert;
-      const usdPrice=invert?1/price:price;
-      prices[h.symbol]={usd:usdPrice,quote:price,source:invert?'Yahoo FX · inverted':'Yahoo FX'};
-      successCount++;
-    }
-  });
   quotes.forEach(result=>{
     if(result.status!=='fulfilled') return;
     const {h,price}=result.value;
@@ -765,15 +763,27 @@ async function refreshYahoo(){
   const failures=quotes.filter(x=>x.status==='rejected').length;
   if(successCount){
     lastMarketUpdate=new Date();
-    setFeed(failures?'error':'live',failures?successCount+' quote'+(successCount===1?'':'s')+' active · '+failures+' unavailable':successCount+' FX quote'+(successCount===1?'':'s')+' active');
-    // Refresh the USD values and allocation chart when quotes arrive. The render
-    // guard preserves any input currently being edited.
+    setFeed(failures?'error':'live',failures?successCount+' quote'+(successCount===1?'':'s')+' active · '+failures+' unavailable':successCount+' Yahoo quote'+(successCount===1?'':'s')+' active');
     render();
-  }else{
-    setFeed('error','Some feeds unavailable');
+  }else if(failures){
+    setFeed('error','Some Yahoo feeds unavailable');
     console.warn('No Yahoo quotes available:',quotes.filter(x=>x.status==='rejected').map(x=>x.reason));
   }
 }
+
+async function refreshMarketFeeds(){
+  const results=await Promise.allSettled([refreshFx(),refreshYahoo()]);
+  const fxResult=results[0], yahooResult=results[1];
+  const fxCount=fxResult.status==='fulfilled'?fxResult.value:0;
+  if(fxResult.status==='rejected') console.warn('Frankfurter FX refresh failed:',fxResult.reason);
+  if(fxCount){
+    lastMarketUpdate=new Date();
+    setFeed('live','Frankfurter FX · '+fxCount+' currency'+(fxCount===1?'':'ies'));
+    render();
+  }
+  if(yahooResult.status==='rejected') console.warn('Yahoo refresh failed:',yahooResult.reason);
+}
+
 $('btnAddAsset').addEventListener('click',()=>{
   $('addAssetBox').classList.toggle('open');
   if($('addAssetBox').classList.contains('open')) $('newAssetSymbol').focus();
@@ -782,7 +792,7 @@ $('btnAddAsset').addEventListener('click',()=>{
 function updateAssetFeedPreview(){
   const type=$('newAssetType').value;
   const preview=$('newAssetFeedPreview');
-  preview.textContent=type==='crypto' ? 'AUTO · Binance / USDT' : 'AUTO · Yahoo FX → USD';
+  preview.textContent=type==='crypto' ? 'AUTO · Binance / USDT' : 'AUTO · Frankfurter FX → USD';
   $('newAssetSymbol').placeholder=type==='crypto'?'SOL':'JPY';
   $('newAssetName').placeholder=type==='crypto'?'Solana':'Japanese Yen Cash';
 }
@@ -808,14 +818,14 @@ $('btnConfirmAsset').addEventListener('click',async()=>{
       asset={symbol,name,type:'crypto',feed:'BINANCE',pair,unit:symbol,holding:0,avgBuy:0,custom:true};
     }else{
       const fx=await resolveFx(symbol);
-      asset={symbol,name,type:'fx',feed:fx.pair==='USDUSD'?'PEG':'YAHOO',pair:fx.pair,unit:symbol,holding:0,avgBuy:0,custom:true,invert:fx.invert||false};
+      asset={symbol,name,type:'fx',feed:fx.pair==='USDUSD'?'PEG':'FRANKFURTER',pair:fx.pair,unit:symbol,holding:0,avgBuy:0,custom:true,invert:fx.invert||false};
     }
     portfolioData.holdings.push(asset);
     $('newAssetSymbol').value=''; $('newAssetName').value='';
     $('addAssetBox').classList.remove('open');
     render();
     connectBinance();
-    await refreshYahoo();
+    await refreshMarketFeeds();
   }catch(e){
     alert(e.message || 'Could not auto-detect a market feed.');
   }finally{
@@ -830,7 +840,7 @@ $('btnPortfolioSave').addEventListener('click',async()=>{
   try{
     // Persist the values first, then refresh market quotes and redraw once.
     await savePortfolio();
-    await refreshYahoo();
+    await refreshMarketFeeds();
     render(true);
     status.textContent='✓ Saved · Portfolio refreshed'; status.className='save-status-live'; status.style.display='inline';
   }catch(e){
@@ -847,16 +857,16 @@ $('btnPortfolioReset').addEventListener('click',()=>{
   prices={};
   render();
   connectBinance();
-  refreshYahoo();
+  refreshMarketFeeds();
 });
 
 (async()=>{
   await loadPortfolio();
   render();
   connectBinance();
-  await refreshYahoo();
+  await refreshMarketFeeds();
   clearInterval(yahooTimer);
-  yahooTimer=setInterval(refreshYahoo,30000);
+  yahooTimer=setInterval(refreshMarketFeeds,30000);
 })();
 </script>
 </body>
