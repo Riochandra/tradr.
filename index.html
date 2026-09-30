@@ -615,7 +615,6 @@ function bindInputs(){
       const h=portfolioData.holdings.find(x=>x.symbol===input.dataset.symbol);
       if(!h) return;
       h[input.dataset.field]=Math.max(0,parseFloat(input.value)||0);
-      render();
     });
   });
 }
@@ -636,7 +635,6 @@ function connectBinance(){
       if(!h) return;
       prices[h.symbol]={usd:parseFloat(d.c),source:'Binance live'};
       lastMarketUpdate=new Date();
-      render();
     }catch{}
   };
   ws.onerror=()=>setFeed('error','Market feed error');
@@ -710,7 +708,6 @@ async function refreshYahoo(){
     });
     lastMarketUpdate=new Date();
     setFeed('live','Mixed feeds active');
-    render();
   }catch(e){
     console.warn('Quote refresh failed:',e);
     setFeed('error','Some feeds unavailable');
@@ -772,8 +769,11 @@ $('btnPortfolioSave').addEventListener('click',async()=>{
   const btn=$('btnPortfolioSave'), status=$('portfolioSaveStatus');
   btn.disabled=true; btn.textContent='Saving…'; status.style.display='none';
   try{
+    // Persist the values first, then refresh market quotes and redraw once.
     await savePortfolio();
-    status.textContent='✓ Saved'; status.className='save-status-live'; status.style.display='inline';
+    await refreshYahoo();
+    render();
+    status.textContent='✓ Saved · Portfolio refreshed'; status.className='save-status-live'; status.style.display='inline';
   }catch(e){
     status.textContent='✕ '+e.message; status.className='save-status-live error'; status.style.display='inline';
   }finally{
