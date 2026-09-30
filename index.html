@@ -515,7 +515,15 @@ async function savePortfolio(){
   portfolioData.updatedAt=payload.updatedAt;
 }
 
-function render(){
+function render(force=false){
+  // Never rebuild the holdings table while the user is typing.
+  // Live Binance/Yahoo updates can fire many times per second; rebuilding the DOM
+  // here would destroy the focused input and make decimal entry impossible.
+  if(!force && portfolioInputFocused){
+    portfolioRenderPending=true;
+    return;
+  }
+  portfolioRenderPending=false;
   const rows=$('holdingsBody');
   rows.innerHTML='';
   const values=portfolioData.holdings.map(h=>({h,value:(h.holding||0)*(prices[h.symbol]?.usd ?? fallbackPrice(h))}));
@@ -611,15 +619,28 @@ function renderPie(values,total){
 
 function bindInputs(){
   document.querySelectorAll('.holding-input').forEach(input=>{
+    input.addEventListener('focus',()=>{
+      portfolioInputFocused=true;
+    });
     input.addEventListener('input',()=>{
       const h=portfolioData.holdings.find(x=>x.symbol===input.dataset.symbol);
       if(!h) return;
-      h[input.dataset.field]=Math.max(0,parseFloat(input.value)||0);
+      // Keep the DOM value untouched while typing (e.g. `0.` or `0.25`).
+      // The next keystroke will update the numeric state without rerendering.
+      const value=input.value;
+      h[input.dataset.field]=value==='' ? 0 : Math.max(0,Number(value)||0);
+    });
+    input.addEventListener('blur',()=>{
+      portfolioInputFocused=false;
+      // Do not redraw on blur. Portfolio values refresh only when Save is pressed
+      // (or when a structural action such as delete/reset/add explicitly redraws).
     });
   });
 }
 
 let lastMarketUpdate=null;
+let portfolioInputFocused=false;
+let portfolioRenderPending=false;
 
 function connectBinance(){
   if(ws) try{ws.close()}catch{}
@@ -772,7 +793,7 @@ $('btnPortfolioSave').addEventListener('click',async()=>{
     // Persist the values first, then refresh market quotes and redraw once.
     await savePortfolio();
     await refreshYahoo();
-    render();
+    render(true);
     status.textContent='✓ Saved · Portfolio refreshed'; status.className='save-status-live'; status.style.display='inline';
   }catch(e){
     status.textContent='✕ '+e.message; status.className='save-status-live error'; status.style.display='inline';
