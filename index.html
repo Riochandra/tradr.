@@ -3,1002 +3,205 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a246a" />
 <title>Veraison.</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMEEwQTBBIi8+CiAgPHRleHQgeD0iNSIgeT0iMjQiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtd2VpZ2h0PSI3MDAiIGZvbnQtc2l6ZT0iMjIiIGZpbGw9IiNGMEVERTgiPlQ8L3RleHQ+CiAgPGNpcmNsZSBjeD0iMjYiIGN5PSIyMiIgcj0iMyIgZmlsbD0iI0M5QTg0QyIvPgo8L3N2Zz4=" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%3E%3Crect%20x%3D%277%27%20y%3D%270%27%20width%3D%272%27%20height%3D%273%27%20fill%3D%27%23804000%27%2F%3E%3Crect%20x%3D%279%27%20y%3D%271%27%20width%3D%275%27%20height%3D%272%27%20fill%3D%27%23008000%27%2F%3E%3Crect%20x%3D%2710%27%20y%3D%273%27%20width%3D%272%27%20height%3D%271%27%20fill%3D%27%23008000%27%2F%3E%3Cg%20fill%3D%27%23800080%27%20stroke%3D%27%23400040%27%3E%3Ccircle%20cx%3D%274.5%27%20cy%3D%276.5%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%278%27%20cy%3D%276.5%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%2711.5%27%20cy%3D%276.5%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%276.3%27%20cy%3D%2710%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%279.7%27%20cy%3D%2710%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%278%27%20cy%3D%2713.5%27%20r%3D%272%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%23ff80ff%27%3E%3Crect%20x%3D%273%27%20y%3D%275%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%276.5%27%20y%3D%275%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%2710%27%20y%3D%275%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%275%27%20y%3D%278.5%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%278.5%27%20y%3D%278.5%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%276.8%27%20y%3D%2712%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" />
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --black: #0A0A0A;
-    --surface: #111111;
-    --surface2: #161616;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.13);
-    --text: #F0EDE8;
-    --muted: rgba(240,237,232,0.42);
-    --dim: rgba(240,237,232,0.2);
-    --gold: #C9A84C;
-    --gold-soft: rgba(201,168,76,0.12);
-    --green: #4CAF6F;
-  }
-  html { scroll-behavior: smooth; }
-  body { background: var(--black); color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-  a { color: inherit; text-decoration: none; }
+:root{
+  --face:#d4d0c8;--hi:#fff;--lo:#808080;--dk:#404040;--navy:#0a246a;
+  --bg:#000;--tx:#c8c8c8;--mut:#8a8a8a;--up:#3cff3c;--dn:#ff5050;--yel:#ffe94d;--grid:#242424;
+  --ui:Tahoma,Verdana,"MS Sans Serif",Geneva,sans-serif;
+  --mono:"Lucida Console",Consolas,"Courier New",monospace;
+  --raised:inset -1px -1px 0 var(--dk),inset 1px 1px 0 var(--hi),inset -2px -2px 0 var(--lo),inset 2px 2px 0 var(--face);
+  --sunken:inset -1px -1px 0 var(--hi),inset 1px 1px 0 var(--lo),inset -2px -2px 0 var(--face),inset 2px 2px 0 var(--dk);
+}
+*{box-sizing:border-box}
+html{background:var(--face)}
+body{margin:0;background:var(--face);color:#000;font:11px/1.35 var(--ui)}
+.win{display:flex;flex-direction:column;min-height:100vh;min-width:0}
+b,strong{font-weight:bold}
 
-  /* NAV */
-  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; border-bottom: 0.5px solid var(--border); background: rgba(10,10,10,0.94); backdrop-filter: blur(14px); }
-  .logo { font-weight: 600; font-size: 17px; letter-spacing: 0.14em; }
-  .logo .dot { color: var(--gold); }
-  .nav-links { list-style: none; display: flex; gap: 32px; }
-  .nav-links a { font-size: 12px; font-weight: 400; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); transition: color 0.18s; }
-  .nav-links a:hover { color: var(--text); }
+.titlebar{display:flex;align-items:center;gap:6px;padding:3px 6px;background:linear-gradient(90deg,#0a246a,#a6caf0);color:#fff;font-size:12px;font-weight:bold}
+.titlebar .ico{image-rendering:pixelated}
+.titlebar .right{margin-left:auto;font-weight:normal}
 
-  /* HERO */
-  .hero { min-height: 100vh; padding: 160px 48px 96px; display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; }
-  .hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 72px 72px; opacity: 0.35; pointer-events: none; }
-  .hero::after { content: ''; position: absolute; bottom: -120px; left: 50%; transform: translateX(-50%); width: 640px; height: 320px; background: radial-gradient(ellipse, rgba(201,168,76,0.07) 0%, transparent 70%); pointer-events: none; }
-  .hero-tag { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 28px; display: flex; align-items: center; gap: 10px; }
-  .hero-tag::before { content: ''; width: 20px; height: 1px; background: var(--gold); display: block; }
-  .hero-name { font-size: clamp(64px, 10vw, 120px); font-weight: 300; letter-spacing: -0.04em; line-height: 0.92; color: var(--text); position: relative; z-index: 1; }
-  .hero-name .dot { color: var(--gold); }
-  .hero-desc { margin-top: 36px; font-size: 16px; font-weight: 300; color: var(--muted); max-width: 500px; line-height: 1.75; position: relative; z-index: 1; }
-  .hero-desc strong { color: var(--text); font-weight: 400; }
-  .hero-scroll { position: absolute; bottom: 36px; right: 48px; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); writing-mode: vertical-rl; display: flex; align-items: center; gap: 10px; }
-  .hero-scroll::after { content: ''; width: 1px; height: 44px; background: linear-gradient(to bottom, rgba(201,168,76,0.5), transparent); }
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;padding:6px 6px 4px;align-items:stretch}
+fieldset.grp{display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px 10px;margin:0;padding:3px 8px 7px;border:1px solid var(--lo);box-shadow:1px 1px 0 var(--hi),inset 1px 1px 0 var(--hi);min-width:0}
+fieldset.grp legend{padding:0 3px}
+fieldset.block{display:block}
+.toolbar fieldset.grow{flex:1 1 340px}
+.f{min-width:0}
+.f label{display:block;margin-bottom:2px}
+.f .opt{color:#404040}
 
-  /* SECTION */
-  .section { padding: 96px 48px; }
-  .section-label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 52px; display: flex; align-items: center; gap: 10px; }
-  .section-label::before { content: ''; width: 14px; height: 1px; background: var(--gold); display: block; }
-  hr.div { border: none; border-top: 0.5px solid var(--border); margin: 0 48px; }
+input,select{font:11px var(--ui);height:22px;padding:1px 4px;color:#000;background:#fff;border:0;border-radius:0;box-shadow:var(--sunken)}
+select{padding-right:2px;max-width:100%}
+input:focus-visible,select:focus-visible{outline:1px solid var(--navy);outline-offset:1px}
+button{font:11px var(--ui);height:23px;padding:0 12px;color:#000;background:var(--face);border:0;border-radius:0;box-shadow:var(--raised);cursor:pointer;white-space:nowrap}
+button:active:not(:disabled){box-shadow:var(--sunken);padding:1px 11px 0 13px}
+button:focus-visible{outline:1px dotted #000;outline-offset:-5px}
+button.primary{font-weight:bold;margin:1px;box-shadow:0 0 0 1px #000,var(--raised)}
+button.primary:active:not(:disabled){box-shadow:0 0 0 1px #000,var(--sunken)}
+button:disabled{color:var(--lo);text-shadow:1px 1px 0 var(--hi);cursor:default}
 
-  /* TRADING */
-  .trading-layout { display: grid; grid-template-columns: 1fr 1.1fr; gap: 80px; align-items: start; }
-  .trading-headline { font-size: clamp(30px, 4vw, 44px); font-weight: 300; letter-spacing: -0.025em; line-height: 1.12; color: var(--text); }
-  .trading-headline em { font-style: normal; color: var(--gold); }
-  .trading-body { font-size: 14px; color: var(--muted); line-height: 1.85; font-weight: 300; margin-bottom: 20px; }
-/*  .instruments { margin-top: 40px; display: flex; flex-direction: column; border-top: 0.5px solid var(--border); }
-  .instrument { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 0.5px solid var(--border); gap: 16px; }
-  .instrument-left { display: flex; align-items: center; gap: 16px; }
-  .instrument-ticker { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: 0.05em; min-width: 52px; }
-  .instrument-name { font-size: 13px; color: var(--muted); font-weight: 300; }
-  .instrument-tags { display: flex; gap: 6px; }
-  .chip { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border: 0.5px solid var(--border2); padding: 3px 8px; border-radius: 0; }
-  .chip.gold { color: var(--gold); border-color: rgba(201,168,76,0.3); }
-  .strategy-box { margin-top: 36px; border: 0.5px solid var(--border2); padding: 28px; background: var(--surface); position: relative; }
-  .strategy-box::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--gold); }
-  .strategy-box-label { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
-  .strategy-box p { font-size: 13px; color: var(--muted); line-height: 1.75; font-weight: 300; }
-*/
+.hint{padding:0 8px 6px;color:#202020}
 
-  /* LIVE PORTFOLIO */
-  .portfolio-shell { display: grid; grid-template-columns: 1.35fr 0.65fr; gap: 1px; background: var(--border); }
-  .portfolio-panel { background: var(--black); padding: 30px 30px 34px; min-width: 0; }
-  .portfolio-panel-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:22px; }
-  .portfolio-kicker { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
-  .portfolio-title { font-size:clamp(25px,3vw,38px); font-weight:300; letter-spacing:-.025em; line-height:1.08; }
-  .portfolio-sub { color:var(--muted); font-size:12px; font-weight:300; line-height:1.7; max-width:520px; margin-top:10px; }
-  .feed-status { display:flex; align-items:center; gap:8px; font-family:'Space Mono',monospace; font-size:9px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); white-space:nowrap; }
-  .feed-dot { width:7px; height:7px; border-radius:50%; background:#E0A33A; box-shadow:0 0 0 3px rgba(224,163,58,.08); }
-  .feed-dot.live { background:var(--green); box-shadow:0 0 0 3px rgba(76,175,111,.10); }
-  .feed-dot.error { background:#E05C5C; box-shadow:0 0 0 3px rgba(224,92,92,.08); }
+/* ---------- profile + trading ---------- */
+.hero-name{margin:0 0 6px;font:bold 30px/1 var(--ui);letter-spacing:-.02em}
+.hero-name .dot{color:var(--navy)}
+.hero-desc{margin:0 0 6px;font-size:12px;line-height:1.5;max-width:80ch}
+.hero-desc:last-child,.trading-body:last-child{margin-bottom:0}
+.trading-headline{margin:0 0 8px;font:bold 15px/1.25 var(--ui)}
+.trading-headline em{font-style:normal;color:var(--navy)}
+.trading-body{margin:0 0 6px;font-size:12px;line-height:1.5;max-width:80ch}
 
-  .portfolio-summary { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); margin-bottom:22px; }
-  .summary-cell { background:var(--surface); padding:18px 18px 20px; }
-  .summary-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-  .summary-value { font-family:'Space Mono',monospace; font-size:clamp(18px,2.2vw,27px); color:var(--text); line-height:1.1; }
-  .summary-value.gold { color:var(--gold); }
-  .summary-value.positive { color:var(--green); }
-  .summary-value.negative { color:#E05C5C; }
-  .summary-meta { font-family:'Space Mono',monospace; font-size:8px; color:var(--dim); margin-top:7px; }
+/* ---------- KPI strip ---------- */
+.strip{display:flex;flex-wrap:wrap;margin:0 6px 6px;padding:3px;background:var(--bg);box-shadow:var(--sunken);font:12px var(--mono);color:var(--tx)}
+.kpi{padding:1px 14px 1px 8px;border-right:1px solid var(--grid);white-space:nowrap}
+.kpi:last-child{border-right:0}
+.kpi .l{color:var(--mut);margin-right:8px}
+.summary-value{font-weight:bold}
+.summary-value.gold{color:var(--yel)}
+.summary-value.positive{color:var(--up)}
+.summary-value.negative{color:var(--dn)}
+.summary-value.dim{color:var(--mut);font-weight:normal}
 
-  .holdings-table-wrap { overflow-x:auto; border-top:0.5px solid var(--border); }
-  .holdings-table { width:100%; border-collapse:collapse; min-width:0; table-layout:fixed; }
-  .holdings-table th { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.11em; text-transform:uppercase; color:var(--dim); font-weight:400; text-align:right; padding:12px 6px; border-bottom:.5px solid var(--border); }
-  .holdings-table th:nth-child(1){width:16%}.holdings-table th:nth-child(2){width:14%}.holdings-table th:nth-child(3){width:13%}.holdings-table th:nth-child(4){width:15%}.holdings-table th:nth-child(5){width:15%}.holdings-table th:nth-child(6){width:12%}.holdings-table th:nth-child(7){width:8%}.holdings-table th:nth-child(8){width:7%}
-  .holdings-table th:first-child,.holdings-table th:nth-child(2) { text-align:left; }
-  .holdings-table td { padding:12px 6px; border-bottom:.5px solid var(--border); text-align:right; vertical-align:middle; overflow:hidden; }
-  .holdings-table td:first-child,.holdings-table td:nth-child(2) { text-align:left; }
-  .holding-symbol { font-family:'Space Mono',monospace; font-size:12px; font-weight:700; color:var(--text); }
-  .holding-name { font-size:11px; color:var(--muted); margin-top:2px; }
-  .holding-price { font-family:'Space Mono',monospace; font-size:11px; color:var(--text); white-space:nowrap; }
-  .cash-na { font-family:'Space Mono',monospace; font-size:10px; color:var(--dim); }
-  .cash-value { color:var(--gold); font-weight:600; }
-  .holding-feed { display:block; font-family:'Space Mono',monospace; font-size:7px; color:var(--dim); margin-top:2px; text-transform:uppercase; }
-  .holding-input { width:108px; background:transparent; border:.5px solid var(--border2); color:var(--gold); padding:7px 8px; font-family:'Space Mono',monospace; font-size:11px; text-align:right; outline:none; }
-  .holding-input:focus { border-color:var(--gold); background:var(--gold-soft); }
-  .holding-input:disabled { opacity:.55; cursor:not-allowed; }
-  .pnl { font-family:'Space Mono',monospace; font-size:11px; }
-  .pnl.positive { color:var(--green); }
-  .pnl.negative { color:#E05C5C; }
-  .alloc-pct-live { font-family:'Space Mono',monospace; font-size:10px; color:var(--muted); }
+/* ---------- action row ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;padding:0 6px 6px}
+.save-status-live{display:none;padding:3px 6px;font:11px var(--mono);color:#005a00;box-shadow:inset 1px 1px 0 var(--lo),inset -1px -1px 0 var(--hi)}
+.save-status-live.error{color:#800000}
 
-  .portfolio-actions { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-top:16px; }
-  .btn-portfolio { font-family:'Space Grotesk',sans-serif; font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; border:.5px solid var(--border2); background:none; color:var(--muted); padding:9px 14px; cursor:pointer; }
-  .btn-portfolio:hover { color:var(--text); border-color:var(--gold); }
-  .btn-portfolio.primary { background:var(--gold); border-color:var(--gold); color:#0A0A0A; }
-  .btn-portfolio.primary:hover { opacity:.86; }
-  .save-status-live { font-family:'Space Mono',monospace; font-size:9px; color:var(--green); display:none; }
-  .save-status-live.error { color:#E05C5C; }
+fieldset.add-asset-box{display:none;margin:0 6px 6px}
+fieldset.add-asset-box.open{display:flex}
+.asset-feed-preview{height:22px;min-width:190px;display:flex;align-items:center;padding:1px 6px;font:11px var(--mono);color:#202020;background:var(--face);box-shadow:var(--sunken)}
+.add-asset-box input{width:130px}
+.add-asset-box select{width:96px}
+.feed-note{flex:1 1 100%;color:#202020;line-height:1.45}
+.feed-note strong{color:#000}
 
-  /* ALLOCATION / PIE */
-  .allocation-panel { background:var(--black); padding:30px; }
-  .allocation-headline { font-size:clamp(25px,3vw,38px); font-weight:300; letter-spacing:-.025em; line-height:1.08; }
-  .allocation-headline em { font-style:normal; color:var(--gold); }
-  .allocation-sub { font-size:12px; color:var(--muted); font-weight:300; margin-top:12px; line-height:1.7; }
-  .pie-wrap { display:grid; place-items:center; margin:30px auto 25px; position:relative; width:min(310px,82vw); aspect-ratio:1; }
-  .pie-chart { width:100%; height:100%; border-radius:50%; position:relative; background:var(--surface2); }
-  .pie-chart::after { content:''; position:absolute; width:49%; height:49%; border-radius:50%; background:var(--black); inset:25.5%; box-shadow:0 0 0 1px rgba(255,255,255,.03); }
-  .pie-center { position:absolute; z-index:2; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; }
-  .pie-center-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.15em; text-transform:uppercase; color:var(--dim); }
-  .pie-center-value { font-family:'Space Mono',monospace; font-size:17px; color:var(--text); margin-top:4px; }
-  .allocation-legend { display:flex; flex-direction:column; border-top:.5px solid var(--border); }
-  .legend-row { display:grid; grid-template-columns:12px 1fr auto; gap:9px; align-items:center; padding:9px 0; border-bottom:.5px solid var(--border); }
-  .legend-swatch { width:8px; height:8px; border-radius:50%; }
-  .legend-symbol { font-family:'Space Mono',monospace; font-size:10px; color:var(--text); }
-  .legend-value { font-family:'Space Mono',monospace; font-size:9px; color:var(--muted); text-align:right; }
-  .allocation-note { margin-top:16px; font-family:'Space Mono',monospace; font-size:8px; line-height:1.65; color:var(--dim); }
-  .allocation-filter-bar { margin-top:20px; padding:13px 14px; border:.5px solid var(--border); background:var(--surface); }
-  .allocation-filter-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-  .allocation-filter-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.13em; text-transform:uppercase; color:var(--text); }
-  .allocation-filter-meta { font-family:'Space Mono',monospace; font-size:8px; color:var(--dim); }
-  .allocation-filter-actions { display:flex; gap:6px; margin-top:9px; }
-  .allocation-filter-action { border:.5px solid var(--border2); background:none; color:var(--muted); padding:5px 8px; font-family:'Space Mono',monospace; font-size:7px; text-transform:uppercase; letter-spacing:.08em; cursor:pointer; }
-  .allocation-filter-action:hover { color:var(--text); border-color:var(--gold); }
-  .allocation-filter-list { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
-  .allocation-filter-chip { display:inline-flex; align-items:center; gap:6px; border:.5px solid var(--border2); background:var(--black); color:var(--muted); padding:6px 8px; cursor:pointer; user-select:none; }
-  .allocation-filter-chip input { position:absolute; opacity:0; pointer-events:none; }
-  .allocation-filter-chip .filter-dot { width:7px; height:7px; border-radius:50%; background:var(--dim); flex:0 0 auto; }
-  .allocation-filter-chip .filter-symbol { font-family:'Space Mono',monospace; font-size:8px; }
-  .allocation-filter-chip.active { color:var(--text); border-color:rgba(201,168,76,.55); background:var(--gold-soft); }
-  .allocation-filter-chip.active .filter-dot { background:var(--gold); }
-  .allocation-filter-empty { font-family:'Space Mono',monospace; font-size:8px; color:var(--dim); padding:3px 0; }
+/* ---------- holdings grid ---------- */
+.gridframe{display:flex;flex-direction:column;margin:0 6px 6px;padding:2px;background:var(--bg);box-shadow:var(--sunken)}
+.gridwrap{overflow-x:auto}
+.holdings-table{border-collapse:separate;border-spacing:0;width:100%;min-width:900px;font:12px var(--mono);color:var(--tx)}
+.holdings-table th{position:sticky;top:0;z-index:2;padding:3px 8px;background:var(--face);color:#000;font:bold 11px var(--ui);text-align:right;white-space:nowrap;box-shadow:var(--raised)}
+.holdings-table td{padding:2px 8px;text-align:right;white-space:nowrap;vertical-align:middle;border-right:1px solid var(--grid);border-bottom:1px solid var(--grid)}
+.holdings-table th:nth-child(-n+2),.holdings-table td:nth-child(-n+2){text-align:left}
+.holdings-table tbody tr:nth-child(even){background:#0a0a0a}
+.holdings-table tbody tr:hover{background:#111c3c}
+.holding-symbol{color:var(--yel);font-weight:bold}
+.holding-name{color:var(--mut);font-size:11px}
+.holding-price{color:var(--tx)}
+.cash-value{font-weight:bold;color:#fff}
+.holding-feed{display:block;color:var(--mut);font-size:10px}
+.cash-na{color:var(--mut)}
+.pnl.positive{color:var(--up)}
+.pnl.negative{color:var(--dn)}
+.alloc-pct-live{color:var(--tx)}
+.custom-badge{margin-left:6px;padding:0 3px;font:10px var(--ui);color:var(--mut);border:1px solid var(--lo);vertical-align:middle}
+.holding-input{width:104px;height:20px;padding:0 4px;font:12px var(--mono);text-align:right}
+.holding-input:disabled{background:var(--face);color:var(--lo)}
+.remove-asset{height:19px;padding:0 7px;color:#800000}
+.remove-asset:active:not(:disabled){padding:1px 6px 0 8px}
 
-  /* ADD ASSET */
-  .add-asset-row { display:flex; justify-content:flex-end; margin:14px 0 0; }
-  .add-asset-box { display:none; margin-top:14px; border:.5px solid var(--border2); background:var(--surface); padding:16px; }
-  .add-asset-box.open { display:block; }
-  .add-asset-grid { display:grid; grid-template-columns:110px 90px 1fr 1fr auto; gap:8px; align-items:end; }
-  .asset-field label { display:block; font-family:'Space Mono',monospace; font-size:7px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); margin-bottom:5px; }
-  .asset-field input,.asset-field select { width:100%; background:var(--black); border:.5px solid var(--border2); color:var(--text); padding:8px; font-family:'Space Mono',monospace; font-size:10px; outline:none; }
-  .asset-field input:focus,.asset-field select:focus { border-color:var(--gold); }
-.asset-feed-preview { width:100%; min-height:34px; display:flex; align-items:center; background:var(--black); border:.5px solid var(--border2); color:var(--dim); padding:8px; font-family:'Space Mono',monospace; font-size:9px; }
-  .remove-asset { background:none; border:.5px solid rgba(224,92,92,.35); color:#E05C5C; cursor:pointer; padding:8px 10px; font-family:'Space Mono',monospace; font-size:9px; }
-  .remove-asset:hover { border-color:#E05C5C; }
-  .custom-badge { display:inline-block; margin-left:6px; font-family:'Space Mono',monospace; font-size:6px; letter-spacing:.08em; color:var(--gold); border:.5px solid rgba(201,168,76,.25); padding:2px 4px; vertical-align:middle; }
-  @media (max-width:900px) { .add-asset-grid { grid-template-columns:1fr 1fr; } .add-asset-grid .asset-field:nth-child(3), .add-asset-grid .asset-field:nth-child(4) { grid-column:span 2; } }
+/* ---------- allocation ---------- */
+fieldset.alloc{margin:0 6px 6px;display:block}
+.allocation-sub{margin:0 0 8px;color:#202020;line-height:1.45;max-width:90ch}
+.alloc-body{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.chartframe{flex:0 1 340px;min-width:0;padding:14px 14px 32px;background:var(--bg);box-shadow:var(--sunken)}
+.alloc-side{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.pie-wrap{position:relative;width:100%;max-width:300px;aspect-ratio:1;margin:0 auto}
+.pie-chart{width:100%;height:100%}
+.pie-svg{width:100%;height:100%;display:block;overflow:visible}
+.pie-slice{cursor:pointer;stroke:#000;stroke-width:1;vector-effect:non-scaling-stroke}
+.pie-slice:hover{stroke:#fff;stroke-width:2}
+.pie-slice:focus{outline:none}
+.pie-slice:focus-visible{stroke:#fff;stroke-width:2;stroke-dasharray:3 2}
+.pie-frame{fill:none;stroke:var(--lo);stroke-width:1}
+.pie-inner{fill:#000;stroke:var(--lo);stroke-width:1}
+.pie-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;font-family:var(--mono)}
+.pie-center-label{font-size:11px;color:var(--mut)}
+.pie-center-value{font-size:16px;font-weight:bold;color:var(--yel);margin-top:2px}
+.pie-hint{position:absolute;left:0;right:0;bottom:-22px;text-align:center;font:11px var(--mono);color:var(--mut);pointer-events:none}
 
-  /* FEED SETTINGS */
-  .feed-note { margin-top:18px; padding-top:15px; border-top:.5px solid var(--border); font-family:'Space Mono',monospace; font-size:8px; line-height:1.7; color:var(--dim); }
-  .feed-note strong { color:var(--muted); font-weight:400; }
+.allocation-filter-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:1 1 100%}
+.allocation-filter-meta{color:#404040}
+.allocation-filter-actions{display:flex;gap:6px;flex:1 1 100%}
+.allocation-filter-actions button{min-width:52px}
+.allocation-filter-list{display:flex;flex-wrap:wrap;gap:4px 12px;flex:1 1 100%}
+.allocation-filter-chip{position:relative;display:inline-flex;align-items:center;gap:4px;user-select:none;cursor:default}
+.allocation-filter-chip input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+.filter-dot{width:13px;height:13px;flex:none;background:#fff;box-shadow:var(--sunken)}
+.allocation-filter-chip.active .filter-dot{background:#fff url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2713%27%20height%3D%2713%27%20shape-rendering%3D%27crispEdges%27%3E%3Cpath%20d%3D%27M3%206l2%202%205-5v2L5%2010%203%208z%27%2F%3E%3C%2Fsvg%3E") center no-repeat}
+.filter-symbol{padding:1px 2px}
+.allocation-filter-chip:focus-within .filter-symbol{outline:1px dotted #000}
 
-  /* RESPONSIVE PORTFOLIO */
-  @media (max-width: 1100px) {
-    .portfolio-shell { grid-template-columns:1fr; }
-  }
+.allocation-legend{padding:2px;background:var(--bg);box-shadow:var(--sunken);font:12px var(--mono);color:var(--tx);max-height:270px;overflow:auto}
+.legend-row{display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:center;padding:2px 8px;border-bottom:1px solid var(--grid);cursor:pointer}
+.legend-row:last-child{border-bottom:0}
+.legend-row:hover{background:#111c3c}
+.legend-swatch{width:10px;height:10px}
+.legend-symbol{color:var(--yel);font-weight:bold}
+.legend-value{text-align:right}
 
-  /* FOOTER */
-  footer { border-top: 0.5px solid var(--border); padding: 28px 48px; display: flex; align-items: center; justify-content: space-between; }
-  .footer-logo { font-weight: 600; font-size: 14px; letter-spacing: 0.14em; }
-  .footer-logo .dot { color: var(--gold); }
-  .footer-copy { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: var(--dim); }
-  .footer-nav { display: flex; gap: 24px; list-style: none; }
-  .footer-nav a { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); transition: color 0.18s; }
-  .footer-nav a:hover { color: var(--text); }
+/* ---------- notes ---------- */
+details.notes{margin:0 6px 6px}
+details.notes summary{padding:2px 4px;cursor:pointer;width:max-content}
+details.notes .nb{max-height:170px;overflow:auto;margin-top:3px;padding:6px 8px;background:#fff;box-shadow:var(--sunken)}
+details.notes p{margin:0 0 7px}
 
-  /* RESPONSIVE */
-  @media (max-width: 900px) {
-    nav { padding: 0 24px; }
-    .hero { padding: 120px 24px 72px; }
-    hr.div { margin: 0 24px; }
-    .section { padding: 72px 24px; }
-    .trading-layout { grid-template-columns: 1fr; gap: 40px; }
-    .portfolio-grid { grid-template-columns: 1fr; }
-    .allocation-layout { grid-template-columns: 1fr; gap: 40px; }
-    .contact-layout { grid-template-columns: 1fr; gap: 48px; }
-    footer { padding: 24px; flex-direction: column; gap: 16px; text-align: center; }
-    .hero-scroll { display: none; }
-    .edit-toggle { bottom: 18px; right: 18px; width: 38px; height: 38px; font-size: 16px; }
-  }
-  @media (max-width: 580px) {
-    .nav-links { display: none; }
-    .instrument { flex-wrap: wrap; }
-    .alloc-item { flex-wrap: wrap; gap: 8px; }
-    .alloc-label { min-width: 40px; font-size: 12px; }
-    .alloc-pct { min-width: 44px; font-size: 12px; }
-    .alloc-pct-input { width: 52px; font-size: 12px; }
-  }
+/* ---------- status bar ---------- */
+.statusbar{display:flex;gap:3px;padding:2px 3px;margin-top:auto}
+.statusbar>div{padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:inset 1px 1px 0 var(--lo),inset -1px -1px 0 var(--hi)}
+.statusbar .msg{flex:1;min-width:0}
+.feed-dot{display:inline-block;width:9px;height:9px;margin-right:6px;vertical-align:-1px;background:var(--yel);border:1px solid #000}
+.feed-dot.live{background:var(--up)}
+.feed-dot.error{background:#f00}
 
-  /* MOBILE PORTFOLIO / TOUCH UX */
-  .holdings-table-wrap { -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: thin; }
-  .holding-input, .btn-portfolio, .remove-asset, .allocation-filter-action, .allocation-filter-chip,
-  .asset-field input, .asset-field select { touch-action: manipulation; }
-  @media (max-width: 700px) {
-    nav { height:56px; padding:0 16px; }
-    .logo { font-size:15px; }
-    .hero { min-height:92vh; padding:112px 16px 58px; }
-    .hero-name { font-size:clamp(52px,17vw,82px); }
-    .hero-desc { font-size:14px; margin-top:26px; }
-    .section { padding:58px 16px; }
-    .section-label { margin-bottom:34px; font-size:9px; }
-    hr.div { margin:0 16px; }
+/* ---------- dialog ---------- */
+.w2k-modal-backdrop{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.25)}
+.w2k-modal-backdrop.open{display:flex}
+.dlg{width:min(380px,100%);padding:3px;background:var(--face);box-shadow:var(--raised),3px 3px 0 rgba(0,0,0,.45)}
+.dlg .titlebar{padding:3px 3px 3px 6px}
+.xbtn{width:16px;height:14px;padding:0;margin-left:auto;background:var(--face) url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2716%27%20height%3D%2714%27%3E%3Cpath%20d%3D%27M4%203L10.5%209.5M10.5%203L4%209.5%27%20stroke%3D%27%23000%27%20stroke-width%3D%271.7%27%2F%3E%3C%2Fsvg%3E") center no-repeat}
+.xbtn:active:not(:disabled){padding:0;background-position:1px 1px}
+.dlg-body{padding:8px}
+.w2k-asset-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--lo);box-shadow:0 1px 0 var(--hi)}
+.w2k-asset-icon{width:36px;height:36px;display:grid;place-items:center;border:1px solid #000;background:#000;color:#000;font:bold 11px var(--mono)}
+.w2k-asset-symbol{font-size:15px;font-weight:bold}
+.w2k-asset-name{color:#404040}
+.w2k-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.w2k-stat{padding:4px 8px;background:var(--bg);box-shadow:var(--sunken);font-family:var(--mono)}
+.w2k-stat-label{color:var(--mut);font-size:11px}
+.w2k-stat-value{margin-top:1px;font-size:12px;font-weight:bold;color:var(--tx);overflow-wrap:anywhere}
+.w2k-stat-value.green{color:var(--up)}
+.w2k-stat-value.red{color:var(--dn)}
+.w2k-dialog-footer{display:flex;justify-content:flex-end;margin-top:10px}
+.w2k-dialog-footer button{min-width:75px}
 
-    .portfolio-shell { gap:0; }
-    .portfolio-panel, .allocation-panel { padding:20px 16px 24px; }
-    .portfolio-panel-head { flex-direction:column; gap:12px; margin-bottom:18px; }
-    .portfolio-sub { font-size:11px; }
-    .feed-status { font-size:8px; }
-    .portfolio-summary { grid-template-columns:1fr; margin-bottom:18px; }
-    .summary-cell { padding:15px 14px 16px; }
-    .summary-value { font-size:22px; }
-
-    /* The holdings grid stays tabular, but becomes a comfortable horizontal touch-scroll area. */
-    .holdings-table-wrap { margin:0 -16px; padding:0 16px; border-top:0.5px solid var(--border); }
-    .holdings-table { min-width:860px; table-layout:fixed; }
-    .holdings-table th, .holdings-table td { padding:11px 7px; }
-    .holdings-table th { font-size:7px; }
-    .holding-symbol { font-size:11px; }
-    .holding-name { font-size:10px; }
-    .holding-price, .pnl { font-size:10px; }
-    .holding-input { width:92px; min-height:38px; font-size:12px; padding:8px 7px; }
-    .remove-asset { min-height:38px; white-space:nowrap; }
-
-    .add-asset-row { justify-content:stretch; }
-    .add-asset-row .btn-portfolio { width:100%; min-height:42px; }
-    .add-asset-box { padding:13px; }
-    .add-asset-grid { grid-template-columns:1fr !important; }
-    .add-asset-grid .asset-field:nth-child(3), .add-asset-grid .asset-field:nth-child(4) { grid-column:auto; }
-    .add-asset-grid > * { width:100%; }
-    .add-asset-grid .btn-portfolio { min-height:42px; }
-    .portfolio-actions { flex-wrap:wrap; justify-content:stretch; }
-    .portfolio-actions .btn-portfolio { flex:1 1 140px; min-height:42px; }
-    .save-status-live { width:100%; order:-1; }
-
-    .allocation-headline { font-size:30px; }
-    .allocation-sub { font-size:11px; }
-    .pie-wrap { width:min(290px,82vw); margin-top:24px; }
-    .allocation-filter-bar { padding:12px; }
-    .allocation-filter-head { align-items:flex-start; flex-direction:column; gap:4px; }
-    .allocation-filter-actions { width:100%; }
-    .allocation-filter-action { flex:1; min-height:36px; }
-    .allocation-filter-list { gap:7px; }
-    .allocation-filter-chip { min-height:36px; padding:8px 10px; }
-    .allocation-filter-chip .filter-symbol { font-size:9px; }
-    .legend-row { grid-template-columns:12px 1fr auto; padding:10px 0; }
-    .legend-symbol { font-size:10px; }
-    .legend-value { font-size:8px; }
-
-    .contact-layout { gap:34px; }
-    footer { padding:22px 16px; }
-  }
-
-  @media (max-width: 380px) {
-    .section { padding-left:12px; padding-right:12px; }
-    hr.div { margin-left:12px; margin-right:12px; }
-    .portfolio-panel, .allocation-panel { padding-left:12px; padding-right:12px; }
-    .holdings-table-wrap { margin-left:-12px; margin-right:-12px; padding-left:12px; padding-right:12px; }
-    .hero { padding-left:12px; padding-right:12px; }
-    nav { padding-left:12px; padding-right:12px; }
-  }
-
-  /* =========================================================
-     WINDOWS 2000 / CLASSIC DESKTOP THEME
-     ========================================================= */
-  :root{
-    --w2k-desktop:#008080;
-    --w2k-face:#d4d0c8;
-    --w2k-face-hi:#ffffff;
-    --w2k-face-lo:#808080;
-    --w2k-dark:#404040;
-    --w2k-navy:#000080;
-    --w2k-blue:#0000ff;
-    --w2k-text:#000000;
-    --w2k-muted:#404040;
-    --w2k-green:#008000;
-    --w2k-red:#800000;
-    --w2k-yellow:#808000;
-  }
-
-  html{scroll-behavior:auto;background:var(--w2k-desktop);}
-  body{
-    background:var(--w2k-desktop);
-    color:var(--w2k-text);
-    font-family:Tahoma,"MS Sans Serif","Segoe UI",sans-serif;
-    font-size:13px;
-    line-height:1.35;
-    -webkit-font-smoothing:auto;
-    overflow-x:hidden;
-  }
-  a{color:#0000ee;text-decoration:underline;}
-  strong{font-weight:700;}
-
-  nav{
-    position:fixed;
-    top:0;left:0;right:0;
-    z-index:1000;
-    height:30px;
-    padding:2px 4px;
-    border:2px outset var(--w2k-face);
-    border-bottom:2px solid #000;
-    background:var(--w2k-navy);
-    box-shadow:none;
-    backdrop-filter:none;
-  }
-  .logo{
-    color:#fff;
-    font-family:Tahoma,"MS Sans Serif",sans-serif;
-    font-size:13px;
-    font-weight:700;
-    letter-spacing:0;
-    text-shadow:1px 1px #000;
-  }
-  .logo .dot{color:#fff;}
-  .nav-links{gap:2px;}
-  .nav-links a{
-    display:block;
-    padding:3px 8px;
-    color:#fff;
-    font-family:Tahoma,"MS Sans Serif",sans-serif;
-    font-size:11px;
-    font-weight:700;
-    letter-spacing:0;
-    text-transform:none;
-    text-decoration:none;
-  }
-  .nav-links a:hover{
-    color:#fff;
-    background:#1084d7;
-  }
-
-  .hero{
-    min-height:0;
-    margin-top:30px;
-    padding:46px 42px 38px;
-    display:block;
-    background:var(--w2k-face);
-    border:2px outset var(--w2k-face);
-    position:relative;
-    overflow:hidden;
-  }
-  .hero::before,.hero::after{display:none;}
-  .hero-tag{
-    font-family:"Courier New",monospace;
-    font-size:11px;
-    letter-spacing:0;
-    text-transform:none;
-    color:#fff;
-    margin-bottom:14px;
-    display:inline-block;
-    padding:3px 7px;
-    background:var(--w2k-navy);
-    border:1px solid #000;
-  }
-  .hero-tag::before{display:none;}
-  .hero-name{
-    font-family:Tahoma,"MS Sans Serif",sans-serif;
-    font-size:clamp(44px,8vw,88px);
-    font-weight:700;
-    letter-spacing:-.04em;
-    line-height:.95;
-    color:#000;
-    text-shadow:2px 2px #fff;
-  }
-  .hero-name .dot{color:#000080;}
-  .hero-desc{
-    margin-top:20px;
-    font-size:13px;
-    font-weight:400;
-    color:#202020;
-    max-width:720px;
-    line-height:1.55;
-  }
-  .hero-desc strong{color:#000;font-weight:700;}
-  .hero-scroll{
-    display:none;
-  }
-
-  .section{
-    margin:14px 24px;
-    padding:20px;
-    background:var(--w2k-face);
-    border:2px outset var(--w2k-face);
-  }
-  .section-label{
-    font-family:"Courier New",monospace;
-    font-size:11px;
-    letter-spacing:0;
-    text-transform:uppercase;
-    color:#fff;
-    margin-bottom:18px;
-    display:inline-block;
-    padding:3px 7px;
-    background:var(--w2k-navy);
-    border:1px solid #000;
-  }
-  .section-label::before{display:none;}
-  hr.div{display:none;}
-
-  .trading-layout{
-    grid-template-columns:1fr 1fr;
-    gap:18px;
-    padding:0;
-  }
-  .trading-headline{
-    font-family:Tahoma,"MS Sans Serif",sans-serif;
-    font-size:clamp(25px,3.2vw,40px);
-    font-weight:700;
-    letter-spacing:-.02em;
-    line-height:1.12;
-    color:#000;
-    text-shadow:1px 1px #fff;
-  }
-  .trading-headline em{color:var(--w2k-navy);}
-  .trading-body{
-    font-size:13px;
-    color:#202020;
-    line-height:1.55;
-    font-weight:400;
-    margin-bottom:12px;
-  }
-  .trading-body em{font-weight:700;color:#000080;}
-
-  .portfolio-shell{
-    display:grid;
-    grid-template-columns:minmax(0,1.5fr) minmax(300px,.75fr);
-    gap:3px;
-    background:var(--w2k-dark);
-    border:2px inset var(--w2k-face);
-    padding:3px;
-  }
-  .portfolio-panel,.allocation-panel{
-    background:var(--w2k-face);
-    color:#000;
-    padding:14px;
-    min-width:0;
-    border:2px inset var(--w2k-face);
-  }
-  .portfolio-panel-head{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:14px;
-    margin-bottom:12px;
-  }
-  .portfolio-kicker{
-    font-family:"Courier New",monospace;
-    font-size:10px;
-    letter-spacing:0;
-    text-transform:uppercase;
-    color:#fff;
-    margin-bottom:5px;
-    display:inline-block;
-    padding:2px 5px;
-    background:var(--w2k-navy);
-    border:1px solid #000;
-  }
-  .portfolio-title{
-    font-family:Tahoma,"MS Sans Serif",sans-serif;
-    font-size:clamp(22px,2.6vw,32px);
-    font-weight:700;
-    letter-spacing:-.02em;
-    line-height:1.1;
-    color:#000;
-    text-shadow:1px 1px #fff;
-  }
-  .portfolio-title em{color:#000080 !important;}
-  .portfolio-sub{
-    color:#303030;
-    font-size:11px;
-    font-weight:400;
-    line-height:1.45;
-    max-width:650px;
-    margin-top:7px;
-  }
-  .feed-status{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    font-family:"Courier New",monospace;
-    font-size:9px;
-    text-transform:uppercase;
-    letter-spacing:0;
-    color:#303030;
-    white-space:nowrap;
-    padding:4px 6px;
-    background:#eee;
-    border:2px inset var(--w2k-face);
-  }
-  .feed-dot{width:8px;height:8px;border-radius:0;background:#808000;box-shadow:none;}
-  .feed-dot.live{background:#008000;box-shadow:none;}
-  .feed-dot.error{background:#800000;box-shadow:none;}
-
-  .portfolio-summary{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:3px;
-    background:var(--w2k-dark);
-    margin-bottom:12px;
-    border:2px inset var(--w2k-face);
-  }
-  .summary-cell{
-    background:#efefef;
-    padding:10px 11px;
-    border:1px solid #fff;
-  }
-  .summary-label{
-    font-family:"Courier New",monospace;
-    font-size:9px;
-    letter-spacing:0;
-    text-transform:uppercase;
-    color:#303030;
-    margin-bottom:5px;
-  }
-  .summary-value{
-    font-family:"Courier New",monospace;
-    font-size:clamp(16px,2vw,23px);
-    font-weight:700;
-    color:#000;
-    line-height:1.1;
-  }
-  .summary-value.gold{color:#000080;}
-  .summary-value.positive{color:#008000;}
-  .summary-value.negative{color:#800000;}
-  .summary-meta{font-family:"Courier New",monospace;font-size:8px;color:#606060;margin-top:5px;}
-
-  .holdings-table-wrap{
-    overflow-x:auto;
-    border:2px inset var(--w2k-face);
-    background:#fff;
-  }
-  .holdings-table{
-    width:100%;
-    border-collapse:collapse;
-    min-width:860px;
-    table-layout:fixed;
-    background:#fff;
-  }
-  .holdings-table th{
-    font-family:Tahoma,"MS Sans Serif",sans-serif;
-    font-size:10px;
-    letter-spacing:0;
-    text-transform:none;
-    color:#000;
-    font-weight:700;
-    text-align:right;
-    padding:5px 6px;
-    border:1px solid #808080;
-    background:linear-gradient(#f5f5f5,#cfcfcf);
-  }
-  .holdings-table th:first-child,.holdings-table th:nth-child(2){text-align:left;}
-  .holdings-table td{
-    padding:6px;
-    border:1px solid #d0d0d0;
-    text-align:right;
-    vertical-align:middle;
-    overflow:hidden;
-    color:#000;
-    background:#fff;
-  }
-  .holdings-table tbody tr:hover td{background:#e6f2ff;}
-  .holding-symbol{
-    font-family:"Courier New",monospace;
-    font-size:11px;
-    font-weight:700;
-    color:#000080;
-  }
-  .holding-name{font-size:10px;color:#404040;margin-top:1px;}
-  .holding-price{font-family:"Courier New",monospace;font-size:10px;color:#000;white-space:nowrap;}
-  .cash-na{font-family:"Courier New",monospace;font-size:10px;color:#707070;}
-  .cash-value{color:#000080;font-weight:700;}
-  .holding-feed{display:block;font-family:"Courier New",monospace;font-size:7px;color:#707070;margin-top:1px;text-transform:uppercase;}
-  .holding-input{
-    width:108px;
-    background:#fff;
-    border:2px inset var(--w2k-face);
-    color:#000;
-    padding:4px 5px;
-    font-family:"Courier New",monospace;
-    font-size:11px;
-    text-align:right;
-    outline:none;
-  }
-  .holding-input:focus{border:2px inset #000080;background:#fff;}
-  .holding-input:disabled{opacity:.55;cursor:not-allowed;}
-  .pnl{font-family:"Courier New",monospace;font-size:10px;font-weight:700;}
-  .pnl.positive{color:#008000;}
-  .pnl.negative{color:#800000;}
-  .alloc-pct-live{font-family:"Courier New",monospace;font-size:9px;color:#303030;}
-
-  .portfolio-actions{
-    display:flex;
-    align-items:center;
-    justify-content:flex-end;
-    gap:6px;
-    margin-top:10px;
-  }
-  .btn-portfolio,.allocation-filter-action,.remove-asset{
-    font-family:Tahoma,"MS Sans Serif",sans-serif;
-    font-size:10px;
-    font-weight:400;
-    letter-spacing:0;
-    text-transform:none;
-    border:2px outset var(--w2k-face);
-    background:var(--w2k-face);
-    color:#000;
-    padding:4px 12px;
-    min-height:25px;
-    cursor:pointer;
-    box-shadow:none;
-  }
-  .btn-portfolio:hover,.allocation-filter-action:hover,.remove-asset:hover{
-    color:#000;
-    border-color:var(--w2k-face);
-  }
-  .btn-portfolio:active,.allocation-filter-action:active,.remove-asset:active{
-    border-style:inset;
-    padding-top:5px;
-    padding-left:13px;
-  }
-  .btn-portfolio.primary{
-    background:var(--w2k-face);
-    border-color:var(--w2k-face);
-    color:#000;
-    font-weight:700;
-    box-shadow:inset 1px 1px #fff;
-  }
-  .btn-portfolio.primary:hover{opacity:1;background:#ddd;}
-  .save-status-live{font-family:"Courier New",monospace;font-size:9px;color:#008000;display:none;}
-  .save-status-live.error{color:#800000;}
-
-  .add-asset-row{display:flex;justify-content:flex-end;margin:8px 0 0;}
-  .add-asset-box{
-    display:none;
-    margin-top:8px;
-    border:2px inset var(--w2k-face);
-    background:#eee;
-    padding:10px;
-  }
-  .add-asset-box.open{display:block;}
-  .add-asset-grid{display:grid;grid-template-columns:110px 90px 1fr 1fr auto;gap:7px;align-items:end;}
-  .asset-field label{
-    display:block;
-    font-family:"Courier New",monospace;
-    font-size:8px;
-    letter-spacing:0;
-    text-transform:uppercase;
-    color:#404040;
-    margin-bottom:3px;
-  }
-  .asset-field input,.asset-field select{
-    width:100%;
-    background:#fff;
-    border:2px inset var(--w2k-face);
-    color:#000;
-    padding:5px;
-    font-family:Tahoma,"MS Sans Serif",sans-serif;
-    font-size:10px;
-    outline:none;
-  }
-  .asset-field input:focus,.asset-field select:focus{border-color:#000080;}
-  .asset-feed-preview{
-    width:100%;
-    min-height:27px;
-    display:flex;
-    align-items:center;
-    background:#fff;
-    border:2px inset var(--w2k-face);
-    color:#404040;
-    padding:5px;
-    font-family:"Courier New",monospace;
-    font-size:9px;
-  }
-  .remove-asset{color:#800000;}
-  .custom-badge{
-    display:inline-block;
-    margin-left:5px;
-    font-family:"Courier New",monospace;
-    font-size:6px;
-    color:#000080;
-    border:1px solid #808080;
-    padding:1px 3px;
-    vertical-align:middle;
-  }
-  .feed-note{
-    margin-top:10px;
-    padding:7px 8px;
-    border:2px inset var(--w2k-face);
-    background:#efefef;
-    font-family:"Courier New",monospace;
-    font-size:8px;
-    line-height:1.5;
-    color:#505050;
-  }
-  .feed-note strong{color:#000;}
-
-  .allocation-panel{
-    position:relative;
-  }
-  .allocation-headline{
-    font-family:Tahoma,"MS Sans Serif",sans-serif;
-    font-size:clamp(24px,2.8vw,34px);
-    font-weight:700;
-    letter-spacing:-.02em;
-    line-height:1.08;
-    color:#000;
-    text-shadow:1px 1px #fff;
-  }
-  .allocation-headline em{color:#000080;}
-  .allocation-sub{font-size:11px;color:#303030;font-weight:400;margin-top:8px;line-height:1.5;}
-  .allocation-filter-bar{
-    margin-top:12px;
-    padding:8px;
-    border:2px inset var(--w2k-face);
-    background:#eee;
-  }
-  .allocation-filter-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-  .allocation-filter-label{font-family:"Courier New",monospace;font-size:9px;letter-spacing:0;text-transform:uppercase;color:#000;}
-  .allocation-filter-meta{font-family:"Courier New",monospace;font-size:8px;color:#606060;}
-  .allocation-filter-actions{display:flex;gap:5px;margin-top:7px;}
-  .allocation-filter-action{padding:3px 9px;min-height:23px;}
-  .allocation-filter-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px;}
-  .allocation-filter-chip{
-    display:inline-flex;
-    align-items:center;
-    gap:5px;
-    border:2px outset var(--w2k-face);
-    background:var(--w2k-face);
-    color:#000;
-    padding:3px 6px;
-    cursor:pointer;
-    user-select:none;
-  }
-  .allocation-filter-chip.active{
-    color:#fff;
-    border:2px inset var(--w2k-face);
-    background:var(--w2k-navy);
-  }
-  .allocation-filter-chip .filter-dot{width:7px;height:7px;border-radius:0;background:#808080;flex:0 0 auto;}
-  .allocation-filter-chip.active .filter-dot{background:#fff;}
-  .allocation-filter-chip .filter-symbol{font-family:"Courier New",monospace;font-size:8px;}
-
-  /* CLICKABLE PIE */
-  .pie-wrap{
-    display:grid;
-    place-items:center;
-    margin:18px auto 14px;
-    position:relative;
-    width:min(330px,90vw);
-    aspect-ratio:1;
-  }
-  .pie-chart{
-    width:100%;
-    height:100%;
-    border-radius:0;
-    position:relative;
-    background:transparent !important;
-  }
-  .pie-chart::after{display:none !important;}
-  .pie-svg{width:100%;height:100%;display:block;overflow:visible;}
-  .pie-slice{
-    cursor:pointer;
-    stroke:#fff;
-    stroke-width:1.2;
-    vector-effect:non-scaling-stroke;
-    transition:filter .12s,transform .12s;
-    transform-box:fill-box;
-    transform-origin:center;
-  }
-  .pie-slice:hover{filter:brightness(1.2);transform:scale(1.025);}
-  .pie-slice:focus{outline:none;filter:brightness(1.25);}
-  .pie-slice.selected{stroke:#000;stroke-width:2;}
-  .pie-frame{fill:none;stroke:#808080;stroke-width:2;}
-  .pie-inner{fill:#efefef;stroke:#fff;stroke-width:2;}
-  .pie-center{position:absolute;z-index:2;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
-  .pie-center-label{
-    font-family:"Courier New",monospace;
-    font-size:9px;
-    letter-spacing:0;
-    text-transform:uppercase;
-    color:#404040;
-    background:#efefef;
-    padding:1px 4px;
-  }
-  .pie-center-value{
-    font-family:"Courier New",monospace;
-    font-size:17px;
-    font-weight:700;
-    color:#000080;
-    margin-top:2px;
-    background:#efefef;
-    padding:1px 4px;
-  }
-  .pie-hint{
-    position:absolute;
-    bottom:3px;
-    left:50%;
-    transform:translateX(-50%);
-    font-family:"Courier New",monospace;
-    font-size:8px;
-    color:#404040;
-    background:#efefef;
-    padding:2px 5px;
-    border:1px solid #808080;
-    pointer-events:none;
-    white-space:nowrap;
-  }
-
-  .allocation-legend{display:flex;flex-direction:column;border-top:2px solid #808080;}
-  .legend-row{
-    display:grid;
-    grid-template-columns:12px 1fr auto;
-    gap:7px;
-    align-items:center;
-    padding:6px 4px;
-    border-bottom:1px solid #c0c0c0;
-    cursor:pointer;
-    background:#fff;
-  }
-  .legend-row:hover{background:#e6f2ff;}
-  .legend-swatch{width:9px;height:9px;border-radius:0;border:1px solid #000;}
-  .legend-symbol{font-family:"Courier New",monospace;font-size:10px;color:#000080;font-weight:700;}
-  .legend-value{font-family:"Courier New",monospace;font-size:9px;color:#202020;text-align:right;}
-
-  .allocation-note{margin-top:8px;font-family:"Courier New",monospace;font-size:8px;line-height:1.5;color:#606060;}
-
-  /* WINDOWS 2000 ALLOCATION POPUP */
-  .w2k-modal-backdrop{
-    position:fixed;
-    inset:0;
-    z-index:5000;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-    background:rgba(0,0,0,.28);
-  }
-  .w2k-modal-backdrop.open{display:flex;}
-  .w2k-dialog{
-    width:min(390px,calc(100vw - 28px));
-    background:var(--w2k-face);
-    border:2px outset var(--w2k-face);
-    box-shadow:8px 8px 0 rgba(0,0,0,.28);
-  }
-  .w2k-dialog-titlebar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:8px;
-    min-height:23px;
-    padding:2px 3px 2px 6px;
-    background:var(--w2k-navy);
-    color:#fff;
-    font-family:Tahoma,"MS Sans Serif",sans-serif;
-    font-size:11px;
-    font-weight:700;
-  }
-  .w2k-dialog-close{
-    width:18px;
-    height:18px;
-    padding:0;
-    border:2px outset var(--w2k-face);
-    background:var(--w2k-face);
-    color:#000;
-    font-weight:700;
-    line-height:12px;
-    cursor:pointer;
-  }
-  .w2k-dialog-close:active{border-style:inset;}
-  .w2k-dialog-body{padding:12px;}
-  .w2k-asset-head{
-    display:flex;
-    align-items:center;
-    gap:9px;
-    margin-bottom:11px;
-    padding-bottom:8px;
-    border-bottom:1px solid #808080;
-  }
-  .w2k-asset-icon{
-    width:28px;height:28px;
-    display:grid;place-items:center;
-    background:#fff;
-    border:2px inset var(--w2k-face);
-    font-family:"Courier New",monospace;
-    font-size:10px;
-    font-weight:700;
-    color:#000080;
-  }
-  .w2k-asset-symbol{font-family:"Courier New",monospace;font-size:15px;font-weight:700;color:#000080;}
-  .w2k-asset-name{font-size:10px;color:#404040;}
-  .w2k-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
-  .w2k-stat{padding:7px;background:#fff;border:2px inset var(--w2k-face);}
-  .w2k-stat-label{font-family:"Courier New",monospace;font-size:8px;color:#606060;text-transform:uppercase;}
-  .w2k-stat-value{font-family:"Courier New",monospace;font-size:12px;font-weight:700;color:#000;margin-top:2px;}
-  .w2k-stat-value.green{color:#008000;}
-  .w2k-stat-value.red{color:#800000;}
-  .w2k-dialog-footer{display:flex;justify-content:flex-end;gap:7px;margin-top:12px;}
-  .w2k-dialog-btn{
-    min-width:72px;
-    min-height:26px;
-    padding:3px 12px;
-    border:2px outset var(--w2k-face);
-    background:var(--w2k-face);
-    color:#000;
-    font-family:Tahoma,"MS Sans Serif",sans-serif;
-    font-size:10px;
-    cursor:pointer;
-  }
-  .w2k-dialog-btn:focus{outline:1px dotted #000;outline-offset:-4px;}
-  .w2k-dialog-btn:active{border-style:inset;}
-
-  footer{
-    margin:14px 24px 24px;
-    border:2px outset var(--w2k-face);
-    background:var(--w2k-face);
-    padding:8px 12px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    color:#000;
-  }
-  .footer-logo{font-family:Tahoma,"MS Sans Serif",sans-serif;font-weight:700;font-size:12px;letter-spacing:0;color:#000;}
-  .footer-logo .dot{color:#000080;}
-  .footer-copy,.footer-nav a{font-family:"Courier New",monospace;font-size:8px;letter-spacing:0;color:#404040;}
-  .footer-nav{display:flex;gap:14px;list-style:none;}
-  .footer-nav a{color:#0000ee;text-decoration:underline;}
-
-  /* Keep the old responsive system, but make it Windows-2000 sized. */
-  @media (max-width:1100px){
-    .portfolio-shell{grid-template-columns:1fr;}
-  }
-  @media (max-width:900px){
-    nav{padding:2px 4px;}
-    .hero{padding:40px 24px 30px;}
-    .section{margin:10px 12px;padding:14px;}
-    .trading-layout{grid-template-columns:1fr;gap:14px;}
-    .portfolio-shell{grid-template-columns:1fr;}
-    .portfolio-summary{grid-template-columns:1fr;}
-    .contact-layout{grid-template-columns:1fr;gap:20px;}
-    footer{margin:10px 12px 18px;flex-direction:column;gap:7px;text-align:center;}
-  }
-  @media (max-width:700px){
-    nav{height:30px;}
-    .nav-links{display:none;}
-    .hero{margin-top:30px;padding:34px 14px 24px;}
-    .hero-name{font-size:clamp(42px,16vw,70px);}
-    .section{margin:8px 6px;padding:10px;}
-    .portfolio-panel,.allocation-panel{padding:10px;}
-    .portfolio-panel-head{flex-direction:column;gap:8px;}
-    .portfolio-summary{grid-template-columns:1fr;}
-    .holdings-table-wrap{margin:0;}
-    .holdings-table{min-width:860px;}
-    .add-asset-grid{grid-template-columns:1fr !important;}
-    .add-asset-grid>*{width:100%;}
-    .portfolio-actions{flex-wrap:wrap;justify-content:stretch;}
-    .portfolio-actions .btn-portfolio{flex:1 1 130px;}
-    .pie-wrap{width:min(300px,86vw);}
-    .w2k-stats{grid-template-columns:1fr;}
-    .footer-nav{flex-wrap:wrap;justify-content:center;}
-  }
-  @media (max-width:380px){
-    .hero{padding-left:10px;padding-right:10px;}
-    .section{margin-left:3px;margin-right:3px;}
-    .pie-wrap{width:260px;}
-  }
-
+@media(max-width:800px){
+  .toolbar fieldset.grow{flex-basis:100%}
+  .titlebar .right{display:none}
+  .strip{flex-direction:column}
+  .kpi{border-right:0}
+}
+@media(max-width:480px){
+  .w2k-stats{grid-template-columns:1fr}
+  .add-asset-box>.f,.add-asset-box input,.add-asset-box select,.asset-feed-preview{width:100%}
+  .filters button{flex:1 1 auto}
+}
 </style>
 </head>
 <body>
 
-<!-- WINDOWS 2000 ALLOCATION DETAILS -->
+<!-- ALLOCATION DETAILS DIALOG -->
 <div class="w2k-modal-backdrop" id="allocationModal" role="dialog" aria-modal="true" aria-labelledby="allocationModalTitle">
-  <div class="w2k-dialog">
-    <div class="w2k-dialog-titlebar">
-      <span id="allocationModalTitle">Allocation Details</span>
-      <button class="w2k-dialog-close" id="allocationModalClose" aria-label="Close">×</button>
+  <div class="dlg">
+    <div class="titlebar">
+      <img class="ico" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%3E%3Crect%20x%3D%277%27%20y%3D%270%27%20width%3D%272%27%20height%3D%273%27%20fill%3D%27%23804000%27%2F%3E%3Crect%20x%3D%279%27%20y%3D%271%27%20width%3D%275%27%20height%3D%272%27%20fill%3D%27%23008000%27%2F%3E%3Crect%20x%3D%2710%27%20y%3D%273%27%20width%3D%272%27%20height%3D%271%27%20fill%3D%27%23008000%27%2F%3E%3Cg%20fill%3D%27%23800080%27%20stroke%3D%27%23400040%27%3E%3Ccircle%20cx%3D%274.5%27%20cy%3D%276.5%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%278%27%20cy%3D%276.5%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%2711.5%27%20cy%3D%276.5%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%276.3%27%20cy%3D%2710%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%279.7%27%20cy%3D%2710%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%278%27%20cy%3D%2713.5%27%20r%3D%272%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%23ff80ff%27%3E%3Crect%20x%3D%273%27%20y%3D%275%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%276.5%27%20y%3D%275%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%2710%27%20y%3D%275%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%275%27%20y%3D%278.5%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%278.5%27%20y%3D%278.5%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%276.8%27%20y%3D%2712%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" width="16" height="16" alt="" />
+      <span id="allocationModalTitle">Allocation details</span>
+      <button type="button" class="xbtn" id="allocationModalClose" aria-label="Close"></button>
     </div>
-    <div class="w2k-dialog-body">
+    <div class="dlg-body">
       <div class="w2k-asset-head">
         <div class="w2k-asset-icon" id="allocationModalIcon">?</div>
         <div>
@@ -1007,205 +210,129 @@
         </div>
       </div>
       <div class="w2k-stats">
-        <div class="w2k-stat"><div class="w2k-stat-label">Portfolio Weight</div><div class="w2k-stat-value" id="allocationModalWeight">—</div></div>
-        <div class="w2k-stat"><div class="w2k-stat-label">Current Value</div><div class="w2k-stat-value" id="allocationModalValue">—</div></div>
+        <div class="w2k-stat"><div class="w2k-stat-label">Portfolio weight</div><div class="w2k-stat-value" id="allocationModalWeight">—</div></div>
+        <div class="w2k-stat"><div class="w2k-stat-label">Current value</div><div class="w2k-stat-value" id="allocationModalValue">—</div></div>
         <div class="w2k-stat"><div class="w2k-stat-label">Holding</div><div class="w2k-stat-value" id="allocationModalHolding">—</div></div>
-        <div class="w2k-stat"><div class="w2k-stat-label">USD Rate</div><div class="w2k-stat-value" id="allocationModalRate">—</div></div>
+        <div class="w2k-stat"><div class="w2k-stat-label">USD rate</div><div class="w2k-stat-value" id="allocationModalRate">—</div></div>
         <div class="w2k-stat"><div class="w2k-stat-label">Floating P/L</div><div class="w2k-stat-value" id="allocationModalPnl">—</div></div>
         <div class="w2k-stat"><div class="w2k-stat-label">Feed</div><div class="w2k-stat-value" id="allocationModalFeed">—</div></div>
       </div>
-      <div class="w2k-dialog-footer">
-        <button class="w2k-dialog-btn" id="allocationModalOk">OK</button>
-      </div>
+      <div class="w2k-dialog-footer"><button type="button" class="primary" id="allocationModalOk">OK</button></div>
     </div>
   </div>
 </div>
 
+<div class="win">
 
-<!-- NAV -->
-<nav>
-  <span class="logo">Veraison<span class="dot">.</span></span>
-  <ul class="nav-links">
-    <li><a href="#trading">Trading</a></li>
-    <li><a href="#portfolio">Portfolio</a></li>
-    <li><a href="#allocation">Allocation</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-</nav>
+  <div class="titlebar">
+    <img class="ico" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2016%2016%27%3E%3Crect%20x%3D%277%27%20y%3D%270%27%20width%3D%272%27%20height%3D%273%27%20fill%3D%27%23804000%27%2F%3E%3Crect%20x%3D%279%27%20y%3D%271%27%20width%3D%275%27%20height%3D%272%27%20fill%3D%27%23008000%27%2F%3E%3Crect%20x%3D%2710%27%20y%3D%273%27%20width%3D%272%27%20height%3D%271%27%20fill%3D%27%23008000%27%2F%3E%3Cg%20fill%3D%27%23800080%27%20stroke%3D%27%23400040%27%3E%3Ccircle%20cx%3D%274.5%27%20cy%3D%276.5%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%278%27%20cy%3D%276.5%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%2711.5%27%20cy%3D%276.5%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%276.3%27%20cy%3D%2710%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%279.7%27%20cy%3D%2710%27%20r%3D%272%27%2F%3E%3Ccircle%20cx%3D%278%27%20cy%3D%2713.5%27%20r%3D%272%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%23ff80ff%27%3E%3Crect%20x%3D%273%27%20y%3D%275%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%276.5%27%20y%3D%275%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%2710%27%20y%3D%275%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%275%27%20y%3D%278.5%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%278.5%27%20y%3D%278.5%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3Crect%20x%3D%276.8%27%20y%3D%2712%27%20width%3D%271%27%20height%3D%271%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" width="16" height="16" alt="" />
+    <span>Veraison.</span>
+    <span class="right">Derivatives Trader · Crypto Investor</span>
+  </div>
 
-<!-- HERO -->
-<section class="hero">
-  <p class="hero-tag">Derivatives Trader · Crypto Investor</p>
-  <h1 class="hero-name">Veraison<span class="dot">.</span></h1>
-  <p class="hero-desc">
-    Day trading <strong>perp futures on crypto &amp; gold futures</strong> using refined strategies.
-    Building a long-term crypto portfolio around <strong>Bitcoin</strong>,
-    <strong>Hyperliquid</strong>, and <strong>Capital B</strong>.
-  </p>
-  <p class="hero-desc">
-    Determined to securing maximum funding from futures propfirms, and re-invest payouts into long-term crypto portfolio.
-  </p>
-  <div class="hero-scroll">Scroll</div>
-</section>
+  <div class="toolbar">
+    <fieldset class="grp block grow">
+      <legend>Profile</legend>
+      <h1 class="hero-name">Veraison<span class="dot">.</span></h1>
+      <p class="hero-desc">
+        Day trading <b>perp futures on crypto &amp; gold futures</b> using refined strategies.
+        Building a long-term crypto portfolio around <b>Bitcoin</b>,
+        <b>Hyperliquid</b>, and <b>Capital B</b>.
+      </p>
+      <p class="hero-desc">
+        Determined to securing maximum funding from futures propfirms, and re-invest payouts into long-term crypto portfolio.
+      </p>
+    </fieldset>
 
-<hr class="div" />
-
-<!-- TRADING -->
-<section class="section" id="trading">
-  <div class="section-label">Futures Trading</div>
-  <div class="trading-layout">
-    <div>
+    <fieldset class="grp block grow" id="trading">
+      <legend>Futures trading</legend>
       <h2 class="trading-headline">How do I go about<br />capitalizing on <em>crypto &amp; Gold futures?</em></h2>
-    </div>
-    <div>
       <p class="trading-body">Day trading crypto through CEXs and Gold (MGC!/GC!) futures on the CME with specific edge for specific asset.</p>
-      <p class="trading-body"><em>Crypto</em> - discretionary momentum, long only approach utilizing price action alongside proprietary indicators for better precision</p>
-      <p class="trading-body"><em>Gold</em> - applying SMC (Smart Money Concept) with core focus on market structure and liquidity zones</p>
-<!--       <div class="instruments">
-        <div class="instrument">
-          <div class="instrument-left">
-            <span class="instrument-ticker">NQ</span>
-            <span class="instrument-name">NASDAQ-100 E-mini Futures</span>
-          </div>
-          <div class="instrument-tags"><span class="chip gold">Primary</span><span class="chip">CME</span></div>
-        </div>
-        <div class="instrument">
-          <div class="instrument-left">
-            <span class="instrument-ticker">ES</span>
-            <span class="instrument-name">S&amp;P 500 E-mini Futures</span>
-          </div>
-          <div class="instrument-tags"><span class="chip gold">Primary</span><span class="chip">CME</span></div>
-        </div>
-      </div> -->
-<!--       <div class="strategy-box">
-        <div class="strategy-box-label">Strategy</div>
-        <p>Orderflow-based execution — delta analysis, absorption, and imbalance identification at key structural levels. Sessions focused on London open and the NY morning window. All entries logged and reviewed daily.</p>
-      </div> -->
-    </div>
+      <p class="trading-body"><b>Crypto</b> - discretionary momentum, long only approach utilizing price action alongside proprietary indicators for better precision</p>
+      <p class="trading-body"><b>Gold</b> - applying SMC (Smart Money Concept) with core focus on market structure and liquidity zones</p>
+    </fieldset>
   </div>
-</section>
 
-<hr class="div" />
+  <div class="hint" id="portfolio"><b>Portfolio &mdash; live mark-to-market.</b> Edit your <b>holding</b>. For crypto/equities, average buy is optional; for foreign cash, USD value is calculated directly from the live FX rate.</div>
 
-<!-- PORTFOLIO -->
-<section class="section" id="portfolio">
-  <div class="section-label">Portfolio &amp; Cash Positions</div>
-  <div class="portfolio-shell">
-    <div class="portfolio-panel">
-      <div class="portfolio-panel-head">
-        <div>
-          <div class="portfolio-kicker">Live mark-to-market</div>
-          <h2 class="portfolio-title">Current <em style="font-style:normal;color:var(--gold)">portfolio value.</em></h2>
-          <p class="portfolio-sub">Edit your <strong style="color:var(--text);font-weight:400">holding</strong>. For crypto/equities, average buy is optional; for foreign cash, USD value is calculated directly from the live FX rate.</p>
-        </div>
-        <div class="feed-status"><span class="feed-dot" id="portfolioFeedDot"></span><span id="portfolioFeedStatus">Connecting</span></div>
-      </div>
-
-      <div class="portfolio-summary">
-        <div class="summary-cell">
-          <div class="summary-label">Current Value · USD</div>
-          <div class="summary-value gold" id="portfolioTotalValue">$0.00</div>
-          <div class="summary-meta" id="portfolioLastUpdate">Market update —</div>
-        </div>
-        <div class="summary-cell">
-          <div class="summary-label">Invested Cost Basis · USD</div>
-          <div class="summary-value" id="portfolioCostBasis">$0.00</div>
-          <div class="summary-meta">Only assets with an Avg Buy</div>
-        </div>
-        <div class="summary-cell">
-          <div class="summary-label">Floating P/L · USD</div>
-          <div class="summary-value" id="portfolioPnl">$0.00</div>
-          <div class="summary-meta" id="portfolioPnlPct">0.00% of invested cost</div>
-        </div>
-      </div>
-
-      <div class="holdings-table-wrap">
-        <table class="holdings-table">
-          <thead>
-            <tr>
-              <th>Asset</th>
-              <th>USD Rate</th>
-              <th>Holding</th>
-              <th>Current Value · USD</th>
-              <th>Avg Buy / Unit</th>
-              <th>Floating P/L</th>
-              <th>Weight</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="holdingsBody"></tbody>
-        </table>
-      </div>
-
-      <div class="add-asset-row">
-        <button class="btn-portfolio" id="btnAddAsset">+ Add New Asset</button>
-      </div>
-      <div class="add-asset-box" id="addAssetBox">
-        <div class="portfolio-kicker">Add crypto / FX position</div>
-        <div class="add-asset-grid">
-          <div class="asset-field"><label>Type</label><select id="newAssetType"><option value="crypto">Crypto</option><option value="fx">FX / Cash</option></select></div>
-          <div class="asset-field"><label>Symbol / Currency</label><input id="newAssetSymbol" placeholder="SOL" maxlength="12" /></div>
-          <div class="asset-field"><label>Name <span style="font-size:6px;opacity:.7">optional</span></label><input id="newAssetName" placeholder="Solana" /></div>
-          <div class="asset-field"><label>Market Feed</label><div id="newAssetFeedPreview" class="asset-feed-preview">AUTO-DETECT</div></div>
-          <button class="btn-portfolio primary" id="btnConfirmAsset">Add</button>
-        </div>
-        <div class="feed-note" style="margin-top:12px">Crypto pair = <strong>Binance USDT pair</strong> (e.g. SOLUSDT). FX conversion = <strong>Frankfurter / central-bank rates</strong> → USD. Holding is all you need for foreign cash; average buy is not used.</div>
-      </div>
-
-      <div class="portfolio-actions">
-        <span class="save-status-live" id="portfolioSaveStatus"></span>
-        <button class="btn-portfolio" id="btnPortfolioReset">Reset</button>
-        <button class="btn-portfolio primary" id="btnPortfolioSave">Save Portfolio</button>
-      </div>
-
-      <div class="feed-note">
-        <strong>Feeds:</strong> BTC/HYPE use Binance WebSocket market data. FX and ALCPB use browser-compatible quote polling. All live values are normalized into USD; average buy is always entered in USD.
-      </div>
-    </div>
-
-    <div class="allocation-panel" id="allocation">
-      <div class="portfolio-kicker">Current allocation</div>
-      <h2 class="allocation-headline">Where the<br /><em>money sits.</em></h2>
-      <p class="allocation-sub">The pie chart is calculated from live USD market value. Select the assets you want to compare — the selected assets are always normalized to 100%.</p>
-
-      <div class="allocation-filter-bar">
-        <div class="allocation-filter-head">
-          <span class="allocation-filter-label">Show in chart</span>
-          <span class="allocation-filter-meta" id="allocationFilterMeta">All assets</span>
-        </div>
-        <div class="allocation-filter-actions">
-          <button type="button" class="allocation-filter-action" id="allocationSelectAll">All</button>
-          <button type="button" class="allocation-filter-action" id="allocationSelectNone">None</button>
-        </div>
-        <div class="allocation-filter-list" id="allocationFilterList"></div>
-      </div>
-
-      <div class="pie-wrap">
-        <div class="pie-chart" id="portfolioPie"></div>
-        <div class="pie-center">
-          <span class="pie-center-label">Portfolio</span>
-          <span class="pie-center-value" id="pieTotal">$0</span>
-        </div>
-      </div>
-
-      <div class="allocation-legend" id="allocationLegend"></div>
-      <div class="allocation-note">Only selected assets are included. Their USD values are re-normalized to 100%, so each percentage is relative to the selected basket.</div>
-    </div>
+  <div class="strip">
+    <div class="kpi"><span class="l">Current value · USD</span><span class="summary-value gold" id="portfolioTotalValue">$0.00</span></div>
+    <div class="kpi" title="Only assets with an Avg Buy"><span class="l">Invested cost basis · USD</span><span class="summary-value" id="portfolioCostBasis">$0.00</span></div>
+    <div class="kpi"><span class="l">Floating P/L · USD</span><span class="summary-value" id="portfolioPnl">$0.00</span></div>
+    <div class="kpi"><span class="l">P/L of invested cost</span><span class="summary-value" id="portfolioPnlPct">0.00%</span></div>
+    <div class="kpi"><span class="summary-value dim" id="portfolioLastUpdate">Market update —</span></div>
   </div>
-</section>
 
-<hr class="div" />
+  <div class="filters">
+    <button type="button" id="btnAddAsset">+ Add New Asset</button>
+    <button type="button" id="btnPortfolioReset">Reset</button>
+    <button type="button" class="primary" id="btnPortfolioSave">Save Portfolio</button>
+    <span class="save-status-live" id="portfolioSaveStatus"></span>
+  </div>
 
-<footer>
-  <span class="footer-logo">TRADR<span class="dot">.</span></span>
-  <span class="footer-copy">© 2026</span>
-  <ul class="footer-nav">
-    <li><a href="#trading">Trading</a></li>
-    <li><a href="#portfolio">Portfolio</a></li>
-    <li><a href="#allocation">Allocation</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-</footer>
+  <fieldset class="grp add-asset-box" id="addAssetBox">
+    <legend>Add crypto / FX position</legend>
+    <div class="f"><label for="newAssetType">Type</label><select id="newAssetType"><option value="crypto">Crypto</option><option value="fx">FX / Cash</option></select></div>
+    <div class="f"><label for="newAssetSymbol">Symbol / Currency</label><input id="newAssetSymbol" placeholder="SOL" maxlength="12" /></div>
+    <div class="f"><label for="newAssetName">Name <span class="opt">(optional)</span></label><input id="newAssetName" placeholder="Solana" /></div>
+    <div class="f"><label>Market feed</label><div id="newAssetFeedPreview" class="asset-feed-preview">AUTO-DETECT</div></div>
+    <button type="button" class="primary" id="btnConfirmAsset">Add</button>
+    <div class="feed-note">Crypto pair = <strong>Binance USDT pair</strong> (e.g. SOLUSDT). FX conversion = <strong>Frankfurter / central-bank rates</strong> &rarr; USD. Holding is all you need for foreign cash; average buy is not used.</div>
+  </fieldset>
+
+  <div class="gridframe"><div class="gridwrap">
+    <table class="holdings-table">
+      <thead><tr>
+        <th>Asset</th><th>USD rate</th><th>Holding</th><th>Current value · USD</th><th>Avg buy / unit</th><th>Floating P/L</th><th>Weight</th><th></th>
+      </tr></thead>
+      <tbody id="holdingsBody"></tbody>
+    </table>
+  </div></div>
+
+  <fieldset class="grp alloc" id="allocation">
+    <legend>Current allocation &mdash; where the money sits</legend>
+    <p class="allocation-sub">The pie chart is calculated from live USD market value. Select the assets you want to compare &mdash; the selected assets are always normalized to 100%.</p>
+    <div class="alloc-body">
+      <div class="chartframe">
+        <div class="pie-wrap">
+          <div class="pie-chart" id="portfolioPie"></div>
+          <div class="pie-center">
+            <span class="pie-center-label">Portfolio</span>
+            <span class="pie-center-value" id="pieTotal">$0</span>
+          </div>
+        </div>
+      </div>
+      <div class="alloc-side">
+        <fieldset class="grp allocation-filter-bar">
+          <legend>Show in chart</legend>
+          <div class="allocation-filter-head"><span id="allocationFilterMeta" class="allocation-filter-meta">All assets</span></div>
+          <div class="allocation-filter-actions">
+            <button type="button" id="allocationSelectAll">All</button>
+            <button type="button" id="allocationSelectNone">None</button>
+          </div>
+          <div class="allocation-filter-list" id="allocationFilterList"></div>
+        </fieldset>
+        <div class="allocation-legend" id="allocationLegend"></div>
+      </div>
+    </div>
+  </fieldset>
+
+  <details class="notes">
+    <summary>Notes &amp; feeds</summary>
+    <div class="nb">
+      <p><b>Feeds:</b> BTC/HYPE use Binance WebSocket market data. FX and ALCPB use browser-compatible quote polling. All live values are normalized into USD; average buy is always entered in USD.</p>
+      <p><b>Allocation:</b> only selected assets are included. Their USD values are re-normalized to 100%, so each percentage is relative to the selected basket.</p>
+      <p><b>Cost basis:</b> cash and FX have no cost basis in this journal, so they contribute $0 to P/L. Only assets with an Avg Buy count toward invested cost and floating P/L.</p>
+    </div>
+  </details>
+
+  <div class="statusbar">
+    <div class="msg"><span class="feed-dot" id="portfolioFeedDot"></span><span id="portfolioFeedStatus">Connecting</span></div>
+    <div>Values in USD</div>
+    <div>&copy; 2026 TRADR.</div>
+  </div>
+
+</div>
 
 <!-- ─── FIREBASE + LIVE PORTFOLIO LOGIC ─────────────────── -->
 <script type="module">
@@ -1344,6 +471,7 @@ function render(force=false){
   $('portfolioPnl').textContent=(pnl>=0?'+':'')+money(pnl);
   $('portfolioPnl').className='summary-value '+(pnl>0?'positive':pnl<0?'negative':'');
   $('portfolioPnlPct').textContent=(pnl>=0?'+':'')+pct(pnlPct);
+  $('portfolioPnlPct').className='summary-value '+(pnl>0?'positive':pnl<0?'negative':'');
   $('portfolioLastUpdate').textContent='Market update '+(lastMarketUpdate ? lastMarketUpdate.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '—');
 
   renderPie(values,total);
@@ -1417,7 +545,7 @@ function renderAllocationFilters(){
 }
 
 function renderPie(values,total){
-  const colors=['#000080','#008080','#800080','#808000','#0000ff','#008000','#800000','#008080','#808080'];
+  const colors=['#ffe94d','#00e5e5','#4da6ff','#ff9a3c','#c77dff','#ff6ec7','#e0e0e0','#a8e060','#808080'];
   syncAllocationSelection();
   renderAllocationFilters();
 
@@ -1535,7 +663,7 @@ function showAllocationPopup(h,value,weight,color){
   $('allocationModalPnl').className='w2k-stat-value '+(pnl===null?'':pnl>=0?'green':'red');
   $('allocationModalFeed').textContent=prices[h.symbol]?.source || sourceLabel(h);
   $('allocationModalIcon').style.background=color;
-  $('allocationModalIcon').style.color='#fff';
+  $('allocationModalIcon').style.color='#000';
   $('allocationModalIcon').style.borderColor='#000';
 
   $('allocationModal').classList.add('open');
