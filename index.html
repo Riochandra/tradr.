@@ -277,7 +277,7 @@ details.notes p{margin:0 0 7px}
     <div class="f"><label for="newAssetName">Name <span class="opt">(optional)</span></label><input id="newAssetName" placeholder="Solana" /></div>
     <div class="f"><label>Market feed</label><div id="newAssetFeedPreview" class="asset-feed-preview">AUTO-DETECT</div></div>
     <button type="button" class="primary" id="btnConfirmAsset">Add</button>
-    <div class="feed-note">Crypto pair = <strong>Kraken USD/USDT pair</strong> (e.g. SOL/USD). FX conversion = <strong>Frankfurter / central-bank rates</strong> &rarr; USD. Holding is all you need for foreign cash; average buy is not used.</div>
+    <div class="feed-note">Crypto pair = <strong>Binance USDT pair</strong> (e.g. SOLUSDT). FX conversion = <strong>Frankfurter / central-bank rates</strong> &rarr; USD. Holding is all you need for foreign cash; average buy is not used.</div>
   </fieldset>
 
   <div class="gridframe"><div class="gridwrap">
@@ -320,7 +320,7 @@ details.notes p{margin:0 0 7px}
   <details class="notes">
     <summary>Notes &amp; feeds</summary>
     <div class="nb">
-      <p><b>Feeds:</b> BTC/HYPE use Kraken WebSocket market data. FX and ALCPB use browser-compatible quote polling. All live values are normalized into USD; average buy is always entered in USD.</p>
+      <p><b>Feeds:</b> BTC/HYPE use Binance WebSocket market data. FX and ALCPB use browser-compatible quote polling. All live values are normalized into USD; average buy is always entered in USD.</p>
       <p><b>Allocation:</b> only selected assets are included. Their USD values are re-normalized to 100%, so each percentage is relative to the selected basket.</p>
       <p><b>Cost basis:</b> cash and FX have no cost basis in this journal, so they contribute $0 to P/L. Only assets with an Avg Buy count toward invested cost and floating P/L.</p>
     </div>
@@ -354,8 +354,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const DEFAULT_HOLDINGS = [
-  { symbol:'BTC',   name:'Bitcoin',        type:'crypto',  feed:'KRAKEN', pair:'BTC/USD', unit:'BTC',   holding:0, avgBuy:0 },
-  { symbol:'HYPE',  name:'Hyperliquid',    type:'crypto',  feed:'KRAKEN', pair:'HYPE/USD',unit:'HYPE',  holding:0, avgBuy:0 },
+  { symbol:'BTC',   name:'Bitcoin',        type:'crypto',  feed:'BINANCE', pair:'BTCUSDT', unit:'BTC',   holding:0, avgBuy:0 },
+  { symbol:'HYPE',  name:'Hyperliquid',    type:'crypto',  feed:'BINANCE', pair:'HYPEUSDT',unit:'HYPE',  holding:0, avgBuy:0 },
   { symbol:'ALCPB', name:'Capital B',      type:'equity',  feed:'YAHOO',   pair:'ALCPB.PA',unit:'share',holding:0, avgBuy:0, quote:'EUR' },
   { symbol:'USDT',  name:'Tether',         type:'stable',  feed:'PEG',    pair:'USDTUSD', unit:'USDT',  holding:0, avgBuy:1 },
   { symbol:'USDC',  name:'USD Coin',       type:'stable',  feed:'PEG',    pair:'USDCUSD', unit:'USDC',  holding:0, avgBuy:1 },
@@ -560,7 +560,7 @@ function render(force=false){
       portfolioData.holdings=portfolioData.holdings.filter(h=>h.symbol!==symbol);
       delete prices[symbol];
       render();
-      connectKraken();
+      connectBinance();
       refreshMarketFeeds();
     });
   });
@@ -578,7 +578,7 @@ function render(force=false){
 }
 
 function sourceLabel(h){
-  if(h.feed==='KRAKEN') return 'Kraken live';
+  if(h.feed==='BINANCE') return 'Binance live';
   if(h.feed==='PEG') return 'USD peg';
   if(h.feed==='YAHOO') return 'Yahoo quote';
   if(h.feed==='FRANKFURTER') return 'Frankfurter FX';
@@ -822,104 +822,24 @@ let lastMarketUpdate=null;
 let portfolioInputFocused=false;
 let portfolioRenderPending=false;
 
-function normalizeKrakenAssetSymbol(symbol){
-  const clean=String(symbol||'').replace(/[^A-Z0-9]/gi,'').toUpperCase();
-  return clean==='BTC' ? 'XBT' : clean;
-}
-
-function krakenPairKey(pair){
-  return String(pair||'').replace(/[^A-Z0-9]/gi,'').toUpperCase();
-}
-
-let krakenReconnectTimer=null;
-let krakenConnectionToken=0;
-
-async function resolveKrakenPair(symbol){
-  const clean=String(symbol||'').replace(/[^A-Z0-9]/gi,'').toUpperCase();
-  if(!clean) throw new Error('Enter a crypto symbol.');
-  const base=normalizeKrakenAssetSymbol(clean);
-  const r=await fetch('https://api.kraken.com/0/public/AssetPairs',{cache:'no-store'});
-  if(!r.ok) throw new Error('Kraken market list unavailable ('+r.status+').');
-  const j=await r.json();
-  if(Array.isArray(j?.error) && j.error.length) throw new Error('Kraken market lookup failed.');
-  const pairs=Object.values(j?.result||{});
-  const candidates=pairs.filter(info=>{
-    const wsname=String(info?.wsname||'').toUpperCase();
-    const alt=String(info?.altname||'').toUpperCase();
-    const status=String(info?.status||'online').toLowerCase();
-    if(status && !['online',''].includes(status)) return false;
-    const parts=wsname.split('/');
-    const pairBase=parts[0]||'';
-    const quote=parts[1]||'';
-    const baseMatch=pairBase===base || (clean==='BTC' && pairBase==='XBT');
-    const altMatch=alt===clean+'USD' || alt===base+'USD' || alt===clean+'USDT' || alt===base+'USDT';
-    return (baseMatch || altMatch) && (quote==='USD' || quote==='USDT');
-  });
-  const ranked=candidates.sort((a,b)=>{
-    const aw=String(a.wsname||'').toUpperCase().endsWith('/USD')?0:1;
-    const bw=String(b.wsname||'').toUpperCase().endsWith('/USD')?0:1;
-    return aw-bw;
-  });
-  const picked=ranked[0];
-  if(!picked?.wsname) throw new Error('No active Kraken USD/USDT market found for '+clean+'.');
-  return picked.wsname;
-}
-
-async function prepareKrakenAssets(){
-  const crypto=portfolioData.holdings.filter(h=>h.type==='crypto');
+function connectBinance(){
+  if(ws) try{ws.close()}catch{}
+  const crypto=portfolioData.holdings.filter(h=>h.feed==='BINANCE' && h.pair);
   if(!crypto.length) return;
-  await Promise.all(crypto.map(async h=>{
-    try{
-      h.pair=await resolveKrakenPair(h.symbol);
-      h.feed='KRAKEN';
-    }catch(e){
-      console.warn('Kraken pair lookup failed for '+h.symbol+':',e);
-      h.feed='KRAKEN';
-      h.pair=null;
-    }
-  }));
-}
-
-function connectKraken(){
-  const token=++krakenConnectionToken;
-  if(krakenReconnectTimer){ clearTimeout(krakenReconnectTimer); krakenReconnectTimer=null; }
-  if(ws) try{ ws.close(); }catch{}
-  ws=null;
-  const crypto=portfolioData.holdings.filter(h=>h.feed==='KRAKEN' && h.pair);
-  if(!crypto.length) return;
-
-  const pairs=[...new Set(crypto.map(h=>h.pair))];
-  ws=new WebSocket('wss://ws.kraken.com/');
-  ws.onopen=()=>{
-    if(token!==krakenConnectionToken) return;
-    setFeed('live','Crypto live · Kraken');
-    ws.send(JSON.stringify({event:'subscribe',pair:pairs,subscription:{name:'ticker'}}));
-  };
+  const streams=crypto.map(h=>h.pair.toLowerCase()+'@ticker');
+  ws=new WebSocket('wss://stream.binance.com:9443/stream?streams='+streams.join('/'));
+  ws.onopen=()=>setFeed('live','Crypto live · Binance');
   ws.onmessage=e=>{
     try{
-      const msg=JSON.parse(e.data);
-      if(!Array.isArray(msg) || !msg[1] || typeof msg[1] !== 'object') return;
-      const ticker=msg[1];
-      const pair=String(msg[msg.length-1]||'');
-      const h=crypto.find(x=>krakenPairKey(x.pair)===krakenPairKey(pair));
+      const d=JSON.parse(e.data).data;
+      const h=crypto.find(x=>x.pair.toUpperCase()===d.s);
       if(!h) return;
-      const last=Number(ticker?.c?.[0]);
-      if(!Number.isFinite(last) || last<=0) return;
-      prices[h.symbol]={usd:last,source:'Kraken live'};
+      prices[h.symbol]={usd:parseFloat(d.c),source:'Binance live'};
       lastMarketUpdate=new Date();
-      if(!portfolioInputFocused) render();
     }catch{}
   };
-  ws.onerror=()=>{
-    if(token===krakenConnectionToken) setFeed('error','Kraken market feed error');
-  };
-  ws.onclose=()=>{
-    if(token!==krakenConnectionToken) return;
-    if(portfolioData.holdings.some(h=>h.feed==='KRAKEN' && h.pair)){
-      setFeed('connecting','Reconnecting to Kraken');
-      krakenReconnectTimer=setTimeout(()=>connectKraken(),3000);
-    }
-  };
+  ws.onerror=()=>setFeed('error','Market feed error');
+  ws.onclose=()=>{ if(portfolioData.holdings.some(h=>h.feed==='BINANCE')) { setFeed('connecting','Reconnecting'); setTimeout(connectBinance,5000); } };
 }
 
 async function fetchYahoo(symbol){
@@ -932,6 +852,23 @@ async function fetchYahoo(symbol){
   const price=meta?.regularMarketPrice;
   if(typeof price!=='number') throw new Error('No quote for '+symbol);
   return price;
+}
+
+// Resolve a crypto symbol to a Binance USDT spot pair automatically.
+async function resolveBinancePair(symbol){
+  const clean=symbol.replace(/[^A-Z0-9]/g,'').toUpperCase();
+  if(!clean) throw new Error('Enter a crypto symbol.');
+  const candidates=[clean+'USDT'];
+  for(const pair of candidates){
+    try{
+      const r=await fetch('https://api.binance.com/api/v3/exchangeInfo?symbol='+encodeURIComponent(pair),{cache:'no-store'});
+      if(!r.ok) continue;
+      const j=await r.json();
+      const info=j?.symbols?.[0];
+      if(info && info.status==='TRADING' && info.quoteAsset==='USDT') return info.symbol;
+    }catch(e){ console.warn('Binance pair lookup failed:',e); }
+  }
+  throw new Error('No active Binance USDT pair found for '+clean+'.');
 }
 
 // Foreign-currency cash uses Frankfurter instead of Yahoo Finance.
@@ -1030,7 +967,7 @@ $('btnAddAsset').addEventListener('click',()=>{
 function updateAssetFeedPreview(){
   const type=$('newAssetType').value;
   const preview=$('newAssetFeedPreview');
-  preview.textContent=type==='crypto' ? 'AUTO · Kraken / USD' : 'AUTO · Frankfurter FX → USD';
+  preview.textContent=type==='crypto' ? 'AUTO · Binance / USDT' : 'AUTO · Frankfurter FX → USD';
   $('newAssetSymbol').placeholder=type==='crypto'?'SOL':'JPY';
   $('newAssetName').placeholder=type==='crypto'?'Solana':'Japanese Yen Cash';
 }
@@ -1052,8 +989,8 @@ $('btnConfirmAsset').addEventListener('click',async()=>{
   try{
     let asset;
     if(type==='crypto'){
-      const pair=await resolveKrakenPair(symbol);
-      asset={symbol,name,type:'crypto',feed:'KRAKEN',pair,unit:symbol,holding:0,avgBuy:0,custom:true};
+      const pair=await resolveBinancePair(symbol);
+      asset={symbol,name,type:'crypto',feed:'BINANCE',pair,unit:symbol,holding:0,avgBuy:0,custom:true};
     }else{
       const fx=await resolveFx(symbol);
       asset={symbol,name,type:'fx',feed:fx.pair==='USDUSD'?'PEG':'FRANKFURTER',pair:fx.pair,unit:symbol,holding:0,avgBuy:0,custom:true,invert:fx.invert||false};
@@ -1062,7 +999,7 @@ $('btnConfirmAsset').addEventListener('click',async()=>{
     $('newAssetSymbol').value=''; $('newAssetName').value='';
     $('addAssetBox').classList.remove('open');
     render();
-    connectKraken();
+    connectBinance();
     await refreshMarketFeeds();
   }catch(e){
     alert(e.message || 'Could not auto-detect a market feed.');
@@ -1116,7 +1053,7 @@ $('btnPortfolioRecover').addEventListener('click',()=>{
   portfolioData.updatedAt=portfolioRecoverySnapshot.updatedAt||null;
   prices={};
   render(true);
-  connectKraken();
+  connectBinance();
   refreshMarketFeeds();
   setFeed('live','Previous portfolio recovered · press Save to persist');
   $('portfolioSaveStatus').textContent='Recovered previous snapshot · not saved yet';
@@ -1129,15 +1066,14 @@ $('btnPortfolioReset').addEventListener('click',()=>{
   portfolioData.holdings=structuredClone(DEFAULT_HOLDINGS);
   prices={};
   render(true);
-  connectKraken();
+  connectBinance();
   refreshMarketFeeds();
 });
 
 (async()=>{
   await loadPortfolio();
-  await prepareKrakenAssets();
   render(true);
-  connectKraken();
+  connectBinance();
   await refreshMarketFeeds();
   clearInterval(yahooTimer);
   yahooTimer=setInterval(refreshMarketFeeds,30000);
