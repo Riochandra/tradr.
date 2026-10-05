@@ -265,7 +265,8 @@ details.notes p{margin:0 0 7px}
   <div class="filters">
     <button type="button" id="btnAddAsset">+ Add New Asset</button>
     <button type="button" id="btnPortfolioReset">Reset</button>
-    <button type="button" class="primary" id="btnPortfolioSave">Save Portfolio</button>
+    <button type="button" class="primary" id="btnPortfolioSave" disabled>Save Portfolio</button>
+    <button type="button" id="btnPortfolioRecover" style="display:none">Recover Previous Save</button>
     <span class="save-status-live" id="portfolioSaveStatus"></span>
   </div>
 
@@ -371,6 +372,11 @@ let ws = null;
 let fxTimer = null;
 let yahooTimer = null;
 
+// Safety state: Firebase must be read successfully before Save is enabled.
+let portfolioLoadState = 'loading';
+let portfolioLoadedSnapshot = null;
+let portfolioRecoverySnapshot = null;
+
 const $ = id => document.getElementById(id);
 const money = n => '$' + Number(n || 0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const compactMoney = n => '$' + Number(n || 0).toLocaleString('en-US',{notation:'compact',maximumFractionDigits:2});
@@ -384,24 +390,118 @@ function setFeed(state,text){
 }
 
 async function loadPortfolio(){
+  portfolioLoadState='loading';
+  $('btnPortfolioSave').disabled=true;
+  $('btnPortfolioRecover').style.display='none';
+  setFeed('connecting','Loading portfolio…');
+
   try{
     const snap=await getDoc(doc(db,...FIRESTORE_DOC.split('/')));
-    if(snap.exists() && Array.isArray(snap.data().holdings)){
-      const remote=snap.data();
-      // The saved portfolio is authoritative: deleted default assets stay deleted.
-      // Backward-compatible because older saves already contain the default holdings.
-      portfolioData.holdings=remote.holdings.map(h=>({...h}));
-      portfolioData.updatedAt=remote.updatedAt||null;
+
+    if(!snap.exists()){
+      portfolioLoadState='ready-empty';
+      portfolioLoadedSnapshot=structuredClone(portfolioData.holdings);
+      $('btnPortfolioSave').disabled=false;
+      setFeed('live','Portfolio ready · no saved portfolio yet');
+      return true;
     }
+
+    const remote=snap.data();
+    if(!Array.isArray(remote.holdings)){
+      throw new Error('Firebase portfolio document contains no valid holdings array.');
+    }
+
+    portfolioData.holdings=remote.holdings.map(h=>({...h}));
+    portfolioData.updatedAt=remote.updatedAt||null;
+    portfolioLoadedSnapshot=structuredClone(portfolioData.holdings);
+
+    if(remote.previousSnapshot && Array.isArray(remote.previousSnapshot.holdings)){
+      portfolioRecoverySnapshot={
+        holdings:remote.previousSnapshot.holdings.map(h=>({...h})),
+        updatedAt:remote.previousSnapshot.updatedAt||null,
+        backedUpAt:remote.previousSnapshot.backedUpAt||null
+      };
+      $('btnPortfolioRecover').style.display='inline-block';
+    }
+
+    portfolioLoadState='ready';
+    $('btnPortfolioSave').disabled=false;
+    setFeed('live','Portfolio loaded · Save protected');
+    return true;
   }catch(e){
-    console.warn('Portfolio load failed:',e);
+    portfolioLoadState='error';
+    portfolioLoadedSnapshot=null;
+    portfolioRecoverySnapshot=null;
+    $('btnPortfolioSave').disabled=true;
+    $('btnPortfolioRecover').style.display='none';
+    setFeed('error','Portfolio read failed · Save locked');
+    console.error('Portfolio load failed:',e);
+    return false;
   }
 }
 
+function holdingsHaveValue(holdings){
+  return holdings.some(h=>Number(h.holding||0)!==0 || Number(h.avgBuy||0)!==0);
+}
+
+function saveLocalRecoverySnapshot(){
+  try{
+    localStorage.setItem('tradrPortfolioRecovery',JSON.stringify({
+      holdings:portfolioData.holdings,
+      updatedAt:portfolioData.updatedAt,
+      backedUpAt:new Date().toISOString()
+    }));
+  }catch(e){ console.warn('Local portfolio backup failed:',e); }
+}
+
 async function savePortfolio(){
-  const payload={holdings:portfolioData.holdings,updatedAt:new Date().toISOString()};
-  await setDoc(doc(db,...FIRESTORE_DOC.split('/')),payload);
-  portfolioData.updatedAt=payload.updatedAt;
+  if(portfolioLoadState!=='ready' && portfolioLoadState!=='ready-empty'){
+    throw new Error('Portfolio is not safely loaded from Firebase. Save has been locked to prevent data loss.');
+  }
+
+  if(
+    portfolioLoadedSnapshot &&
+    holdingsHaveValue(portfolioLoadedSnapshot) &&
+    !holdingsHaveValue(portfolioData.holdings)
+  ){
+    const ok=confirm(
+      'SAFETY LOCK\\n\\n'+
+      'Firebase contains non-zero holdings, but the current screen is all zero.\\n\\n'+
+      'Saving now would erase the remote portfolio.\\n\\n'+
+      'Press OK only if you intentionally want to clear the portfolio.'
+    );
+    if(!ok) throw new Error('Save cancelled by safety lock.');
+  }
+
+  const ref=doc(db,...FIRESTORE_DOC.split('/'));
+  const currentSnap=await getDoc(ref);
+  const now=new Date().toISOString();
+
+  let previousSnapshot=null;
+  if(currentSnap.exists()){
+    const current=currentSnap.data();
+    if(Array.isArray(current.holdings)){
+      previousSnapshot={
+        holdings:current.holdings.map(h=>({...h})),
+        updatedAt:current.updatedAt||null,
+        backedUpAt:now
+      };
+    }
+  }
+
+  saveLocalRecoverySnapshot();
+
+  const payload={
+    holdings:portfolioData.holdings.map(h=>({...h})),
+    updatedAt:now,
+    previousSnapshot
+  };
+
+  await setDoc(ref,payload);
+  portfolioData.updatedAt=now;
+  portfolioLoadedSnapshot=structuredClone(portfolioData.holdings);
+  portfolioRecoverySnapshot=previousSnapshot;
+  if(previousSnapshot) $('btnPortfolioRecover').style.display='inline-block';
 }
 
 function render(force=false){
@@ -911,33 +1011,68 @@ $('btnConfirmAsset').addEventListener('click',async()=>{
 
 $('btnPortfolioSave').addEventListener('click',async()=>{
   const btn=$('btnPortfolioSave'), status=$('portfolioSaveStatus');
+  if(portfolioLoadState!=='ready' && portfolioLoadState!=='ready-empty'){
+    status.textContent='✕ Save locked · Firebase portfolio was not loaded safely';
+    status.className='save-status-live error';
+    status.style.display='inline';
+    return;
+  }
   btn.disabled=true; btn.textContent='Saving…'; status.style.display='none';
   try{
-    // Persist the values first, then refresh market quotes and redraw once.
     await savePortfolio();
     await refreshMarketFeeds();
     render(true);
-    status.textContent='✓ Saved · Portfolio refreshed'; status.className='save-status-live'; status.style.display='inline';
+    status.textContent='✓ Saved · previous version backed up';
+    status.className='save-status-live';
+    status.style.display='inline';
   }catch(e){
-    status.textContent='✕ '+e.message; status.className='save-status-live error'; status.style.display='inline';
+    status.textContent='✕ '+e.message;
+    status.className='save-status-live error';
+    status.style.display='inline';
   }finally{
     btn.disabled=false; btn.textContent='Save Portfolio';
-    setTimeout(()=>status.style.display='none',2500);
+    setTimeout(()=>status.style.display='none',4000);
   }
 });
 
+$('btnPortfolioRecover').addEventListener('click',()=>{
+  if(!portfolioRecoverySnapshot || !Array.isArray(portfolioRecoverySnapshot.holdings)){
+    alert('No previous portfolio snapshot is available.');
+    return;
+  }
+  const count=portfolioRecoverySnapshot.holdings.filter(h=>Number(h.holding||0)!==0).length;
+  const ok=confirm(
+    'RECOVER PREVIOUS SAVE\\n\\n'+
+    'Restore the portfolio snapshot saved before the last overwrite?\\n\\n'+
+    'Non-zero positions: '+count+'\\n'+
+    'Snapshot time: '+(portfolioRecoverySnapshot.updatedAt||'unknown')+'\\n\\n'+
+    'This restores the screen only. Press Save Portfolio afterwards to write it back to Firebase.'
+  );
+  if(!ok) return;
+  portfolioData.holdings=portfolioRecoverySnapshot.holdings.map(h=>({...h}));
+  portfolioData.updatedAt=portfolioRecoverySnapshot.updatedAt||null;
+  prices={};
+  render(true);
+  connectBinance();
+  refreshMarketFeeds();
+  setFeed('live','Previous portfolio recovered · press Save to persist');
+  $('portfolioSaveStatus').textContent='Recovered previous snapshot · not saved yet';
+  $('portfolioSaveStatus').className='save-status-live';
+  $('portfolioSaveStatus').style.display='inline';
+});
+
 $('btnPortfolioReset').addEventListener('click',()=>{
-  if(!confirm('Reset all portfolio inputs to zero?')) return;
+  if(!confirm('Reset all portfolio inputs to zero on this screen?\\n\\nThis does NOT change Firebase until you press Save Portfolio.')) return;
   portfolioData.holdings=structuredClone(DEFAULT_HOLDINGS);
   prices={};
-  render();
+  render(true);
   connectBinance();
   refreshMarketFeeds();
 });
 
 (async()=>{
   await loadPortfolio();
-  render();
+  render(true);
   connectBinance();
   await refreshMarketFeeds();
   clearInterval(yahooTimer);
