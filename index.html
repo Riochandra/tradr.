@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0a246a" />
-<title>Veraison.</title>
+<title>Clover.</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMEEwQTBBIi8+CiAgPHRleHQgeD0iNSIgeT0iMjQiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtd2VpZ2h0PSI3MDAiIGZvbnQtc2l6ZT0iMjIiIGZpbGw9IiNGMEVERTgiPlQ8L3RleHQ+CiAgPGNpcmNsZSBjeD0iMjYiIGN5PSIyMiIgcj0iMyIgZmlsbD0iI0M5QTg0QyIvPgo8L3N2Zz4=" />
 <style>
 :root{
@@ -143,6 +143,23 @@ fieldset.alloc{margin:0 6px 6px;display:block}
 .legend-symbol{color:var(--yel);font-weight:bold}
 .legend-value{text-align:right}
 
+/* ---------- transaction history ---------- */
+.txn-toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 6px 6px}
+.txn-form{display:none;margin:0 6px 6px}
+.txn-form.open{display:flex}
+.txn-form input{width:100%;min-width:110px}
+.txn-form .f{flex:1 1 135px}
+.txn-form .f.description{flex:3 1 260px}
+.txn-frame{margin:0 6px 6px;padding:2px;background:#000;box-shadow:var(--sunken);overflow-x:auto}
+.txn-table{border-collapse:separate;border-spacing:0;width:100%;min-width:900px;background:#000;color:var(--tx);font:12px var(--mono)}
+.txn-table th{padding:4px 7px;background:var(--face);color:#000;font:bold 11px var(--ui);text-align:left;white-space:nowrap;box-shadow:var(--raised)}
+.txn-table td{padding:4px 7px;border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);vertical-align:top}
+.txn-table tbody tr:nth-child(even){background:#0a0a0a}
+.txn-empty{padding:12px;color:var(--mut);text-align:center}
+.txn-actions{display:flex;gap:5px}
+.txn-actions button{height:20px;padding:0 7px}
+.txn-pnl-positive{color:var(--up)}.txn-pnl-negative{color:var(--dn)}
+
 /* ---------- notes ---------- */
 details.notes{margin:0 6px 6px}
 details.notes summary{padding:2px 4px;cursor:pointer;width:max-content}
@@ -225,7 +242,7 @@ details.notes p{margin:0 0 7px}
 <div class="win">
 
   <div class="titlebar">
-    <span>Veraison.</span>
+    <span>Clover.</span>
     <span class="right">Derivatives Trader · Crypto Investor</span>
   </div>
 
@@ -317,6 +334,29 @@ details.notes p{margin:0 0 7px}
     </div>
   </fieldset>
 
+  <fieldset class="grp block" id="transactionHistory" style="margin:0 6px 6px">
+    <legend>Transaction history</legend>
+    <p class="allocation-sub">Manually log closed or open trades. Entry price, size, P/L and dates are recorded independently from live portfolio holdings. Press <b>Save Portfolio</b> to sync changes to Firebase.</p>
+  </fieldset>
+  <div class="txn-toolbar">
+    <button type="button" class="primary" id="btnAddTransaction">+ Add New Transaction</button>
+    <span id="transactionCount" style="color:#404040">0 transactions</span>
+  </div>
+  <fieldset class="grp txn-form" id="transactionForm">
+    <legend id="transactionFormTitle">New transaction</legend>
+    <input type="hidden" id="txnId" />
+    <div class="f"><label for="txnAsset">Asset / Symbol</label><input id="txnAsset" placeholder="BTC, HYPE, XAUUSD…" maxlength="24" required /></div>
+    <div class="f"><label for="txnOpenDate">Open date</label><input id="txnOpenDate" type="date" required /></div>
+    <div class="f"><label for="txnCloseDate">Close date <span style="color:#555">(optional if open)</span></label><input id="txnCloseDate" type="date" /></div>
+    <div class="f"><label for="txnEntryPrice">Entry price</label><input id="txnEntryPrice" type="number" min="0" step="any" placeholder="0.00" required /></div>
+    <div class="f"><label for="txnSize">Size</label><input id="txnSize" type="number" min="0" step="any" placeholder="0.00" required /></div>
+    <div class="f"><label for="txnPnl">P/L · USD</label><input id="txnPnl" type="number" step="any" placeholder="e.g. 125 or -40" required /></div>
+    <div class="f description"><label for="txnDescription">Description</label><input id="txnDescription" placeholder="Setup, reason, notes…" maxlength="500" /></div>
+    <button type="button" class="primary" id="btnSaveTransaction">Add transaction</button>
+    <button type="button" id="btnCancelTransaction">Cancel</button>
+  </fieldset>
+  <div class="txn-frame"><table class="txn-table"><thead><tr><th>Asset</th><th>Open date</th><th>Close date</th><th>Entry price</th><th>Size</th><th>P/L · USD</th><th>Description</th><th>Actions</th></tr></thead><tbody id="transactionsBody"><tr><td colspan="8" class="txn-empty">No transactions yet. Click “Add New Transaction”.</td></tr></tbody></table></div>
+
   <details class="notes">
     <summary>Notes &amp; feeds</summary>
     <div class="nb">
@@ -365,7 +405,8 @@ const DEFAULT_HOLDINGS = [
   { symbol:'IDR',   name:'Indonesian rupiah',type:'fx',    feed:'FRANKFURTER', pair:'IDRUSD', unit:'IDR', holding:0, avgBuy:0 }
 ];
 
-let portfolioData = { holdings: structuredClone(DEFAULT_HOLDINGS), updatedAt:null };
+let portfolioData = { holdings: structuredClone(DEFAULT_HOLDINGS), transactions: [], updatedAt:null };
+let transactions = [];
 let prices = {};
 let allocationSelection = {};
 let ws = null;
@@ -401,6 +442,7 @@ async function loadPortfolio(){
     if(!snap.exists()){
       portfolioLoadState='ready-empty';
       portfolioLoadedSnapshot=structuredClone(portfolioData.holdings);
+      transactions=[]; renderTransactions();
       $('btnPortfolioSave').disabled=false;
       setFeed('live','Portfolio ready · no saved portfolio yet');
       return true;
@@ -412,12 +454,15 @@ async function loadPortfolio(){
     }
 
     portfolioData.holdings=remote.holdings.map(h=>({...h}));
+    transactions=Array.isArray(remote.transactions)?remote.transactions.map(t=>({...t})):[];
+    renderTransactions();
     portfolioData.updatedAt=remote.updatedAt||null;
     portfolioLoadedSnapshot=structuredClone(portfolioData.holdings);
 
     if(remote.previousSnapshot && Array.isArray(remote.previousSnapshot.holdings)){
       portfolioRecoverySnapshot={
         holdings:remote.previousSnapshot.holdings.map(h=>({...h})),
+        transactions:Array.isArray(remote.previousSnapshot.transactions)?remote.previousSnapshot.transactions.map(t=>({...t})):[],
         updatedAt:remote.previousSnapshot.updatedAt||null,
         backedUpAt:remote.previousSnapshot.backedUpAt||null
       };
@@ -483,6 +528,7 @@ async function savePortfolio(){
     if(Array.isArray(current.holdings)){
       previousSnapshot={
         holdings:current.holdings.map(h=>({...h})),
+        transactions:Array.isArray(current.transactions)?current.transactions.map(t=>({...t})):[],
         updatedAt:current.updatedAt||null,
         backedUpAt:now
       };
@@ -493,6 +539,7 @@ async function savePortfolio(){
 
   const payload={
     holdings:portfolioData.holdings.map(h=>({...h})),
+    transactions:transactions.map(t=>({...t})),
     updatedAt:now,
     previousSnapshot
   };
@@ -959,6 +1006,60 @@ async function refreshMarketFeeds(){
   if(yahooResult.status==='rejected') console.warn('Yahoo refresh failed:',yahooResult.reason);
 }
 
+// ---------- Manual transaction history ----------
+function escapeHtml(value){
+  return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function renderTransactions(){
+  const body=$('transactionsBody');
+  $('transactionCount').textContent=transactions.length+' transaction'+(transactions.length===1?'':'s');
+  if(!transactions.length){body.innerHTML='<tr><td colspan="8" class="txn-empty">No transactions yet. Click “Add New Transaction”.</td></tr>';return;}
+  const sorted=transactions.slice().sort((a,b)=>(b.openDate||'').localeCompare(a.openDate||''));
+  body.innerHTML=sorted.map(t=>{
+    const pnl=Number(t.pnl||0);
+    return `<tr>
+      <td><b style="color:var(--yel)">${escapeHtml(t.asset)}</b></td>
+      <td>${escapeHtml(t.openDate||'—')}</td><td>${escapeHtml(t.closeDate||'Open')}</td>
+      <td style="text-align:right">${Number(t.entryPrice||0).toLocaleString('en-US',{maximumFractionDigits:8})}</td>
+      <td style="text-align:right">${Number(t.size||0).toLocaleString('en-US',{maximumFractionDigits:8})}</td>
+      <td style="text-align:right" class="${pnl>0?'txn-pnl-positive':pnl<0?'txn-pnl-negative':''}">${pnl>0?'+':''}$${pnl.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="white-space:normal;min-width:180px;max-width:360px">${escapeHtml(t.description||'—')}</td>
+      <td><div class="txn-actions"><button type="button" data-txn-edit="${escapeHtml(t.id)}">Edit</button><button type="button" data-txn-delete="${escapeHtml(t.id)}">Delete</button></div></td>
+    </tr>`;
+  }).join('');
+  body.querySelectorAll('[data-txn-edit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const t=transactions.find(x=>x.id===btn.dataset.txnEdit);if(!t)return;
+    $('txnId').value=t.id;$('txnAsset').value=t.asset||'';$('txnOpenDate').value=t.openDate||'';$('txnCloseDate').value=t.closeDate||'';
+    $('txnEntryPrice').value=t.entryPrice??'';$('txnSize').value=t.size??'';$('txnPnl').value=t.pnl??'';$('txnDescription').value=t.description||'';
+    $('transactionFormTitle').textContent='Edit transaction';$('btnSaveTransaction').textContent='Save changes';$('transactionForm').classList.add('open');$('txnAsset').focus();
+  }));
+  body.querySelectorAll('[data-txn-delete]').forEach(btn=>btn.addEventListener('click',()=>{
+    const t=transactions.find(x=>x.id===btn.dataset.txnDelete);if(!t)return;
+    if(!confirm('Delete transaction for '+t.asset+'? Changes are not synced until Save Portfolio.'))return;
+    transactions=transactions.filter(x=>x.id!==t.id);renderTransactions();
+  }));
+}
+function resetTransactionForm(){
+  $('txnId').value='';$('txnAsset').value='';$('txnOpenDate').value='';$('txnCloseDate').value='';$('txnEntryPrice').value='';$('txnSize').value='';$('txnPnl').value='';$('txnDescription').value='';
+  $('transactionFormTitle').textContent='New transaction';$('btnSaveTransaction').textContent='Add transaction';$('transactionForm').classList.remove('open');
+}
+$('btnAddTransaction').addEventListener('click',()=>{
+  resetTransactionForm();$('transactionForm').classList.add('open');$('txnOpenDate').value=new Date().toISOString().slice(0,10);$('txnAsset').focus();
+});
+$('btnCancelTransaction').addEventListener('click',resetTransactionForm);
+$('btnSaveTransaction').addEventListener('click',()=>{
+  const id=$('txnId').value;
+  const asset=$('txnAsset').value.trim().toUpperCase();
+  const openDate=$('txnOpenDate').value, closeDate=$('txnCloseDate').value;
+  const entryPrice=$('txnEntryPrice').value, size=$('txnSize').value, pnl=$('txnPnl').value;
+  if(!asset||!openDate||entryPrice===''||size===''||pnl===''){alert('Please fill in Asset, Open date, Entry price, Size, and P/L.');return;}
+  if(closeDate && closeDate<openDate){alert('Close date cannot be earlier than open date.');return;}
+  const item={id:id||('txn-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)),asset,openDate,closeDate,entryPrice:Number(entryPrice),size:Number(size),pnl:Number(pnl),description:$('txnDescription').value.trim()};
+  if(!Number.isFinite(item.entryPrice)||item.entryPrice<0||!Number.isFinite(item.size)||item.size<0||!Number.isFinite(item.pnl)){alert('Please enter valid numeric values.');return;}
+  if(id){transactions=transactions.map(t=>t.id===id?item:t);}else transactions.push(item);
+  renderTransactions();resetTransactionForm();
+});
+
 $('btnAddAsset').addEventListener('click',()=>{
   $('addAssetBox').classList.toggle('open');
   if($('addAssetBox').classList.contains('open')) $('newAssetSymbol').focus();
@@ -1050,6 +1151,8 @@ $('btnPortfolioRecover').addEventListener('click',()=>{
   );
   if(!ok) return;
   portfolioData.holdings=portfolioRecoverySnapshot.holdings.map(h=>({...h}));
+  transactions=Array.isArray(portfolioRecoverySnapshot.transactions)?portfolioRecoverySnapshot.transactions.map(t=>({...t})):[];
+  renderTransactions();
   portfolioData.updatedAt=portfolioRecoverySnapshot.updatedAt||null;
   prices={};
   render(true);
@@ -1072,6 +1175,7 @@ $('btnPortfolioReset').addEventListener('click',()=>{
 
 (async()=>{
   await loadPortfolio();
+  renderTransactions();
   render(true);
   connectBinance();
   await refreshMarketFeeds();
