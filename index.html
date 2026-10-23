@@ -348,9 +348,9 @@ details.notes p{margin:0 0 7px}
     <div class="f"><label for="txnAsset">Asset / Symbol</label><input id="txnAsset" placeholder="BTC, HYPE, XAUUSD…" maxlength="24" required /></div>
     <div class="f"><label for="txnOpenDate">Open date</label><input id="txnOpenDate" type="date" required /></div>
     <div class="f"><label for="txnCloseDate">Close date <span style="color:#555">(optional if open)</span></label><input id="txnCloseDate" type="date" /></div>
-    <div class="f"><label for="txnEntryPrice">Entry price</label><input id="txnEntryPrice" type="number" min="0" step="any" placeholder="0.00" required /></div>
-    <div class="f"><label for="txnSize">Size</label><input id="txnSize" type="number" min="0" step="any" placeholder="0.00" required /></div>
-    <div class="f"><label for="txnPnl">P/L · USD</label><input id="txnPnl" type="number" step="any" placeholder="e.g. 125 or -40" required /></div>
+    <div class="f"><label for="txnEntryPrice">Entry price</label><input id="txnEntryPrice" type="text" inputmode="decimal" placeholder="e.g. 2350.50 or 2,350" required /></div>
+    <div class="f"><label for="txnSize">Size</label><input id="txnSize" type="text" inputmode="decimal" placeholder="e.g. 1, 0.5 BTC, or 2 lots" required /></div>
+    <div class="f"><label for="txnPnl">P/L · USD</label><input id="txnPnl" type="text" inputmode="text" placeholder="e.g. +125, -40, BE, or $125" required /></div>
     <div class="f description"><label for="txnDescription">Description</label><input id="txnDescription" placeholder="Setup, reason, notes…" maxlength="500" /></div>
     <button type="button" class="primary" id="btnSaveTransaction">Add transaction</button>
     <button type="button" id="btnCancelTransaction">Cancel</button>
@@ -1016,13 +1016,15 @@ function renderTransactions(){
   if(!transactions.length){body.innerHTML='<tr><td colspan="8" class="txn-empty">No transactions yet. Click “Add New Transaction”.</td></tr>';return;}
   const sorted=transactions.slice().sort((a,b)=>(b.openDate||'').localeCompare(a.openDate||''));
   body.innerHTML=sorted.map(t=>{
-    const pnl=Number(t.pnl||0);
+    const pnlText=String(t.pnl??'');
+    const pnlNumeric=Number(pnlText.replace(/[$,\s]/g,''));
+    const pnlClass=Number.isFinite(pnlNumeric)&&pnlNumeric>0?'txn-pnl-positive':Number.isFinite(pnlNumeric)&&pnlNumeric<0?'txn-pnl-negative':'';
     return `<tr>
       <td><b style="color:var(--yel)">${escapeHtml(t.asset)}</b></td>
       <td>${escapeHtml(t.openDate||'—')}</td><td>${escapeHtml(t.closeDate||'Open')}</td>
-      <td style="text-align:right">${Number(t.entryPrice||0).toLocaleString('en-US',{maximumFractionDigits:8})}</td>
-      <td style="text-align:right">${Number(t.size||0).toLocaleString('en-US',{maximumFractionDigits:8})}</td>
-      <td style="text-align:right" class="${pnl>0?'txn-pnl-positive':pnl<0?'txn-pnl-negative':''}">${pnl>0?'+':''}$${pnl.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="text-align:right">${escapeHtml(t.entryPrice??'')}</td>
+      <td style="text-align:right">${escapeHtml(t.size??'')}</td>
+      <td style="text-align:right" class="${pnlClass}">${escapeHtml(pnlText)}</td>
       <td style="white-space:normal;min-width:180px;max-width:360px">${escapeHtml(t.description||'—')}</td>
       <td><div class="txn-actions"><button type="button" data-txn-edit="${escapeHtml(t.id)}">Edit</button><button type="button" data-txn-delete="${escapeHtml(t.id)}">Delete</button></div></td>
     </tr>`;
@@ -1054,8 +1056,7 @@ $('btnSaveTransaction').addEventListener('click',()=>{
   const entryPrice=$('txnEntryPrice').value, size=$('txnSize').value, pnl=$('txnPnl').value;
   if(!asset||!openDate||entryPrice===''||size===''||pnl===''){alert('Please fill in Asset, Open date, Entry price, Size, and P/L.');return;}
   if(closeDate && closeDate<openDate){alert('Close date cannot be earlier than open date.');return;}
-  const item={id:id||('txn-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)),asset,openDate,closeDate,entryPrice:Number(entryPrice),size:Number(size),pnl:Number(pnl),description:$('txnDescription').value.trim()};
-  if(!Number.isFinite(item.entryPrice)||item.entryPrice<0||!Number.isFinite(item.size)||item.size<0||!Number.isFinite(item.pnl)){alert('Please enter valid numeric values.');return;}
+  const item={id:id||('txn-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)),asset,openDate,closeDate,entryPrice:entryPrice.trim(),size:size.trim(),pnl:pnl.trim(),description:$('txnDescription').value.trim()};
   if(id){transactions=transactions.map(t=>t.id===id?item:t);}else transactions.push(item);
   renderTransactions();resetTransactionForm();
 });
