@@ -294,7 +294,7 @@ details.notes p{margin:0 0 7px}
     <div class="f"><label for="newAssetName">Name <span class="opt">(optional)</span></label><input id="newAssetName" placeholder="Solana" /></div>
     <div class="f"><label>Market feed</label><div id="newAssetFeedPreview" class="asset-feed-preview">AUTO-DETECT</div></div>
     <button type="button" class="primary" id="btnConfirmAsset">Add</button>
-    <div class="feed-note">Crypto pair = <strong>Binance USDT pair</strong> (e.g. SOLUSDT). FX conversion = <strong>Frankfurter / central-bank rates</strong> &rarr; USD. Holding is all you need for foreign cash; average buy is not used.</div>
+    <div class="feed-note">Crypto price = <strong>CoinGecko → Binance → OKX → Bybit → KuCoin</strong> (automatic fallback). FX conversion = <strong>Frankfurter / central-bank rates</strong> &rarr; USD. Holding is all you need for foreign cash; average buy is not used.</div>
   </fieldset>
 
   <div class="gridframe"><div class="gridwrap">
@@ -627,6 +627,10 @@ function render(force=false){
 
 function sourceLabel(h){
   if(h.feed==='BINANCE') return 'Binance live';
+  if(h.feed==='COINGECKO') return 'CoinGecko aggregate';
+  if(h.feed==='OKX') return 'OKX live';
+  if(h.feed==='BYBIT') return 'Bybit live';
+  if(h.feed==='KUCOIN') return 'KuCoin live';
   if(h.feed==='PEG') return 'USD peg';
   if(h.feed==='YAHOO') return 'Yahoo quote';
   if(h.feed==='FRANKFURTER') return 'Frankfurter FX';
@@ -887,50 +891,137 @@ async function marketApi(provider,path,params={}){
   return data;
 }
 
-// Binance live prices are polled through Vercel every 5 seconds.
-// This avoids requiring the user's browser/network to open Binance WebSockets.
+// Crypto prices use a multi-source resolver. CoinGecko is preferred for broad
+// coverage; centralized exchanges are tried in order when an asset is missing.
+async function fetchCoinGeckoPrices(ids){
+  const unique=[...new Set(ids.filter(Boolean))];
+  if(!unique.length) return {};
+  return marketApi('coingecko','/api/v3/simple/price',{
+    ids:unique.join(','),vs_currencies:'usd'
+  });
+}
+
+async function fetchExchangePrice(symbol, preferred='BINANCE'){
+  const clean=String(symbol||'').replace(/[^A-Z0-9]/gi,'').toUpperCase();
+  if(!clean) throw new Error('Invalid crypto symbol.');
+  const order=['BINANCE','OKX','BYBIT','KUCOIN'];
+  const feeds=[preferred,...order.filter(x=>x!==preferred)];
+  const errors=[];
+  for(const feed of feeds){
+    try{
+      let price=0, pair='';
+      if(feed==='BINANCE'){
+        pair=clean+'USDT';
+        const data=await marketApi('binanceSpot','/api/v3/ticker/price',{symbol:pair});
+        price=Number(data?.price);
+      }else if(feed==='OKX'){
+        pair=clean+'-USDT';
+        const data=await marketApi('okx','/api/v5/market/ticker',{instId:pair});
+        price=Number(data?.data?.[0]?.last);
+      }else if(feed==='BYBIT'){
+        pair=clean+'USDT';
+        const data=await marketApi('bybit','/v5/market/tickers',{category:'spot',symbol:pair});
+        price=Number(data?.result?.list?.[0]?.lastPrice);
+      }else if(feed==='KUCOIN'){
+        pair=clean+'-USDT';
+        const data=await marketApi('kucoin','/api/v1/market/orderbook/level1',{symbol:pair});
+        if(data?.code && data.code!=='200000') throw new Error(data?.msg||'KuCoin returned '+data.code);
+        price=Number(data?.data?.price);
+      }
+      if(Number.isFinite(price)&&price>0) return {price,feed,pair};
+      throw new Error('No valid '+feed+' spot price for '+clean+'/USDT.');
+    }catch(e){ errors.push(feed+': '+(e.message||'unavailable')); }
+  }
+  throw new Error('No supported live market found for '+clean+'. '+errors.join(' | '));
+}
+
+async function resolveCryptoAsset(symbol, requestedName=''){
+  const clean=symbol.replace(/[^A-Z0-9]/g,'').toUpperCase();
+  if(!clean) throw new Error('Enter a crypto symbol.');
+  let selectedCoin=null;
+  try{
+    const search=await marketApi('coingecko','/api/v3/search',{query:requestedName||clean});
+    const matches=(search?.coins||[]).filter(c=>String(c.symbol||'').toUpperCase()===clean);
+    if(matches.length){
+      if(requestedName){
+        const wanted=requestedName.toLowerCase();
+        selectedCoin=matches.find(c=>String(c.name||'').toLowerCase()===wanted) ||
+          matches.find(c=>String(c.name||'').toLowerCase().includes(wanted));
+      }
+      if(!selectedCoin) selectedCoin=matches.slice().sort((a,b)=>
+        (a.market_cap_rank||Number.MAX_SAFE_INTEGER)-(b.market_cap_rank||Number.MAX_SAFE_INTEGER)
+      )[0];
+      if(selectedCoin?.id){
+        const quote=await fetchCoinGeckoPrices([selectedCoin.id]);
+        const price=Number(quote?.[selectedCoin.id]?.usd);
+        if(Number.isFinite(price)&&price>0){
+          return {feed:'COINGECKO',pair:selectedCoin.id,coinId:selectedCoin.id,
+            resolvedName:selectedCoin.name||requestedName||clean,price};
+        }
+      }
+    }
+  }catch(e){ console.warn('CoinGecko asset lookup failed; trying exchange feeds:',e); }
+
+  const exchange=await fetchExchangePrice(clean,'BINANCE');
+  return {...exchange,coinId:null,resolvedName:requestedName||clean};
+}
+
 async function pollBinancePrices(){
   if(binancePolling) return;
   binancePolling=true;
   try{
-    const crypto=portfolioData.holdings.filter(h=>h.feed==='BINANCE' && h.pair);
+    const crypto=portfolioData.holdings.filter(h=>h.type==='crypto' || ['BINANCE','COINGECKO','OKX','BYBIT','KUCOIN'].includes(h.feed));
     if(!crypto.length) return;
-    const results=await Promise.allSettled(crypto.map(async h=>{
-      const data=await marketApi('binanceSpot','/api/v3/ticker/price',{symbol:h.pair});
-      const price=Number(data?.price);
-      if(!Number.isFinite(price) || price<=0) throw new Error('Invalid Binance price for '+h.symbol);
-      return {h,price};
+    const coingecko=crypto.filter(h=>h.coinId && h.feed==='COINGECKO');
+    const updated=new Set();
+    if(coingecko.length){
+      try{
+        const quotes=await fetchCoinGeckoPrices(coingecko.map(h=>h.coinId));
+        for(const h of coingecko){
+          const price=Number(quotes?.[h.coinId]?.usd);
+          if(Number.isFinite(price)&&price>0){
+            prices[h.symbol]={usd:price,source:'CoinGecko · aggregate'};
+            updated.add(h.symbol);
+          }
+        }
+      }catch(e){ console.warn('CoinGecko polling failed:',e); }
+    }
+    const needsFallback=crypto.filter(h=>!updated.has(h.symbol));
+    const results=await Promise.allSettled(needsFallback.map(async h=>{
+      const result=await fetchExchangePrice(h.symbol,h.feed||'BINANCE');
+      h.feed=result.feed; h.pair=result.pair;
+      return {h,...result};
     }));
-    let success=0;
+    let success=updated.size;
     const failures=[];
     results.forEach(result=>{
       if(result.status==='fulfilled'){
-        prices[result.value.h.symbol]={usd:result.value.price,source:'Binance · Vercel proxy'};
+        const {h,price,feed}=result.value;
+        prices[h.symbol]={usd:price,source:feed+' · Vercel proxy'};
         success++;
-      }else failures.push(result.reason?.message || 'Binance request failed');
+      }else failures.push(result.reason?.message||'Crypto price unavailable');
     });
     if(success){
       lastMarketUpdate=new Date();
       setFeed(failures.length?'error':'live',failures.length
-        ? 'Binance proxy · '+success+' active · '+failures.length+' unavailable'
-        : 'Crypto live · Binance via Vercel');
+        ? success+' crypto prices active · '+failures.length+' unavailable'
+        : 'Crypto live · multi-source via Vercel');
       render();
     }else if(failures.length){
-      setFeed('error','Binance proxy error · '+failures[0]);
-      console.warn('Binance proxy polling failed:',failures);
+      setFeed('error','Crypto feeds unavailable · '+failures[0]);
+      console.warn('Multi-source crypto polling failed:',failures);
     }
-  }finally{
-    binancePolling=false;
-  }
+  }finally{ binancePolling=false; }
 }
 
 function connectBinance(){
   if(binanceTimer) clearInterval(binanceTimer);
-  const crypto=portfolioData.holdings.some(h=>h.feed==='BINANCE' && h.pair);
+  const crypto=portfolioData.holdings.some(h=>h.type==='crypto' || ['BINANCE','COINGECKO','OKX','BYBIT','KUCOIN'].includes(h.feed));
   if(!crypto) return;
-  setFeed('connecting','Connecting to Binance via Vercel…');
+  setFeed('connecting','Connecting to multi-source crypto feeds…');
   pollBinancePrices();
-  binanceTimer=setInterval(pollBinancePrices,5000);
+  // 15 seconds balances responsiveness with public API rate limits.
+  binanceTimer=setInterval(pollBinancePrices,15000);
 }
 
 async function fetchYahoo(symbol){
@@ -942,21 +1033,6 @@ async function fetchYahoo(symbol){
   const price=meta?.regularMarketPrice;
   if(typeof price!=='number') throw new Error('No Yahoo quote for '+symbol);
   return price;
-}
-
-// Resolve a crypto symbol to a Binance USDT spot pair automatically.
-async function resolveBinancePair(symbol){
-  const clean=symbol.replace(/[^A-Z0-9]/g,'').toUpperCase();
-  if(!clean) throw new Error('Enter a crypto symbol.');
-  const candidates=[clean+'USDT'];
-  for(const pair of candidates){
-    try{
-      const j=await marketApi('binanceSpot','/api/v3/exchangeInfo',{symbol:pair});
-      const info=j?.symbols?.[0];
-      if(info && info.status==='TRADING' && info.quoteAsset==='USDT') return info.symbol;
-    }catch(e){ console.warn('Binance pair lookup failed:',e); }
-  }
-  throw new Error('No active Binance USDT pair found for '+clean+'.');
 }
 
 // Foreign-currency cash uses Frankfurter instead of Yahoo Finance.
@@ -1109,7 +1185,7 @@ $('btnAddAsset').addEventListener('click',()=>{
 function updateAssetFeedPreview(){
   const type=$('newAssetType').value;
   const preview=$('newAssetFeedPreview');
-  preview.textContent=type==='crypto' ? 'AUTO · Binance / USDT' : 'AUTO · Frankfurter FX → USD';
+  preview.textContent=type==='crypto' ? 'AUTO · CoinGecko → Binance → OKX → Bybit → KuCoin' : 'AUTO · Frankfurter FX → USD';
   $('newAssetSymbol').placeholder=type==='crypto'?'SOL':'JPY';
   $('newAssetName').placeholder=type==='crypto'?'Solana':'Japanese Yen Cash';
 }
@@ -1131,8 +1207,9 @@ $('btnConfirmAsset').addEventListener('click',async()=>{
   try{
     let asset;
     if(type==='crypto'){
-      const pair=await resolveBinancePair(symbol);
-      asset={symbol,name,type:'crypto',feed:'BINANCE',pair,unit:symbol,holding:0,avgBuy:0,custom:true};
+      const resolved=await resolveCryptoAsset(symbol,name);
+      asset={symbol,name: name===symbol ? (resolved.resolvedName||name) : name,type:'crypto',feed:resolved.feed,pair:resolved.pair,coinId:resolved.coinId||null,unit:symbol,holding:0,avgBuy:0,custom:true};
+      prices[symbol]={usd:resolved.price,source:resolved.feed==='COINGECKO'?'CoinGecko · aggregate':resolved.feed+' · Vercel proxy'};
     }else{
       const fx=await resolveFx(symbol);
       asset={symbol,name,type:'fx',feed:fx.pair==='USDUSD'?'PEG':'FRANKFURTER',pair:fx.pair,unit:symbol,holding:0,avgBuy:0,custom:true,invert:fx.invert||false};
