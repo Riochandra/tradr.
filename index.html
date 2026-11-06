@@ -249,7 +249,7 @@ details.notes p{margin:0 0 7px}
   <div class="toolbar">
     <fieldset class="grp block grow">
       <legend>Profile</legend>
-      <h1 class="hero-name">Clover<span class="dot">.</span></h1>
+      <h1 class="hero-name">Veraison<span class="dot">.</span></h1>
       <p class="hero-desc">
         Day trading <b>perp futures on crypto &amp; gold futures</b> using refined strategies.
         Building a long-term crypto portfolio around <b>Bitcoin</b>,
@@ -409,7 +409,8 @@ let portfolioData = { holdings: structuredClone(DEFAULT_HOLDINGS), transactions:
 let transactions = [];
 let prices = {};
 let allocationSelection = {};
-let ws = null;
+let binanceTimer = null;
+let binancePolling = false;
 let fxTimer = null;
 let yahooTimer = null;
 
@@ -869,35 +870,77 @@ let lastMarketUpdate=null;
 let portfolioInputFocused=false;
 let portfolioRenderPending=false;
 
-function connectBinance(){
-  if(ws) try{ws.close()}catch{}
-  const crypto=portfolioData.holdings.filter(h=>h.feed==='BINANCE' && h.pair);
-  if(!crypto.length) return;
-  const streams=crypto.map(h=>h.pair.toLowerCase()+'@ticker');
-  ws=new WebSocket('wss://stream.binance.com:9443/stream?streams='+streams.join('/'));
-  ws.onopen=()=>setFeed('live','Crypto live · Binance');
-  ws.onmessage=e=>{
-    try{
-      const d=JSON.parse(e.data).data;
-      const h=crypto.find(x=>x.pair.toUpperCase()===d.s);
-      if(!h) return;
-      prices[h.symbol]={usd:parseFloat(d.c),source:'Binance live'};
+// All market-data requests go through this application's Vercel proxy.
+async function marketApi(provider,path,params={}){
+  const query=new URLSearchParams({provider,path,...Object.fromEntries(
+    Object.entries(params).map(([k,v])=>[k,String(v)])
+  )});
+  const response=await fetch('/api/market?'+query.toString(),{cache:'no-store'});
+  const body=await response.text();
+  let data;
+  try{ data=JSON.parse(body); }
+  catch{ throw new Error('Market proxy returned invalid JSON (HTTP '+response.status+').'); }
+  if(!response.ok){
+    const detail=data?.error || data?.message || ('HTTP '+response.status);
+    throw new Error(detail);
+  }
+  return data;
+}
+
+// Binance live prices are polled through Vercel every 5 seconds.
+// This avoids requiring the user's browser/network to open Binance WebSockets.
+async function pollBinancePrices(){
+  if(binancePolling) return;
+  binancePolling=true;
+  try{
+    const crypto=portfolioData.holdings.filter(h=>h.feed==='BINANCE' && h.pair);
+    if(!crypto.length) return;
+    const results=await Promise.allSettled(crypto.map(async h=>{
+      const data=await marketApi('binanceSpot','/api/v3/ticker/price',{symbol:h.pair});
+      const price=Number(data?.price);
+      if(!Number.isFinite(price) || price<=0) throw new Error('Invalid Binance price for '+h.symbol);
+      return {h,price};
+    }));
+    let success=0;
+    const failures=[];
+    results.forEach(result=>{
+      if(result.status==='fulfilled'){
+        prices[result.value.h.symbol]={usd:result.value.price,source:'Binance · Vercel proxy'};
+        success++;
+      }else failures.push(result.reason?.message || 'Binance request failed');
+    });
+    if(success){
       lastMarketUpdate=new Date();
-    }catch{}
-  };
-  ws.onerror=()=>setFeed('error','Market feed error');
-  ws.onclose=()=>{ if(portfolioData.holdings.some(h=>h.feed==='BINANCE')) { setFeed('connecting','Reconnecting'); setTimeout(connectBinance,5000); } };
+      setFeed(failures.length?'error':'live',failures.length
+        ? 'Binance proxy · '+success+' active · '+failures.length+' unavailable'
+        : 'Crypto live · Binance via Vercel');
+      render();
+    }else if(failures.length){
+      setFeed('error','Binance proxy error · '+failures[0]);
+      console.warn('Binance proxy polling failed:',failures);
+    }
+  }finally{
+    binancePolling=false;
+  }
+}
+
+function connectBinance(){
+  if(binanceTimer) clearInterval(binanceTimer);
+  const crypto=portfolioData.holdings.some(h=>h.feed==='BINANCE' && h.pair);
+  if(!crypto) return;
+  setFeed('connecting','Connecting to Binance via Vercel…');
+  pollBinancePrices();
+  binanceTimer=setInterval(pollBinancePrices,5000);
 }
 
 async function fetchYahoo(symbol){
-  const url='https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(symbol)+'?interval=1m&range=1d';
-  const r=await fetch(url,{cache:'no-store'});
-  if(!r.ok) throw new Error(symbol+' '+r.status);
-  const j=await r.json();
+  const j=await marketApi('yahoo','/v8/finance/chart/'+encodeURIComponent(symbol),{
+    interval:'1m',range:'1d'
+  });
   const result=j?.chart?.result?.[0];
   const meta=result?.meta;
   const price=meta?.regularMarketPrice;
-  if(typeof price!=='number') throw new Error('No quote for '+symbol);
+  if(typeof price!=='number') throw new Error('No Yahoo quote for '+symbol);
   return price;
 }
 
@@ -908,9 +951,7 @@ async function resolveBinancePair(symbol){
   const candidates=[clean+'USDT'];
   for(const pair of candidates){
     try{
-      const r=await fetch('https://api.binance.com/api/v3/exchangeInfo?symbol='+encodeURIComponent(pair),{cache:'no-store'});
-      if(!r.ok) continue;
-      const j=await r.json();
+      const j=await marketApi('binanceSpot','/api/v3/exchangeInfo',{symbol:pair});
       const info=j?.symbols?.[0];
       if(info && info.status==='TRADING' && info.quoteAsset==='USDT') return info.symbol;
     }catch(e){ console.warn('Binance pair lookup failed:',e); }
@@ -926,10 +967,9 @@ async function fetchFrankfurterFxRates(currencies){
   const clean=[...new Set(currencies.map(c=>c.replace(/[^A-Z]/g,'').toUpperCase()).filter(c=>/^[A-Z]{3}$/.test(c) && c!=='USD'))];
   const rates={USD:1};
   if(!clean.length) return rates;
-  const url='https://api.frankfurter.dev/v2/rates?base=USD&quotes='+encodeURIComponent(clean.join(','));
-  const r=await fetch(url,{cache:'no-store'});
-  if(!r.ok) throw new Error('Frankfurter FX request failed ('+r.status+').');
-  const rows=await r.json();
+  const rows=await marketApi('frankfurter','/v2/rates',{
+    base:'USD',quotes:clean.join(',')
+  });
   for(const row of rows){
     if(row && row.quote && typeof row.rate==='number' && Number.isFinite(row.rate) && row.rate>0){
       rates[row.quote.toUpperCase()]=1/row.rate;
